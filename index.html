@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>105 → 90 kg Plan</title>
+<script>
+  (() => {
+    const saved = localStorage.getItem("wl-theme");
+    const param = new URLSearchParams(window.location.search).get("scoutTheme");
+    const theme = param || saved ||
+      (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    document.documentElement.setAttribute("data-theme", theme);
+  })();
+</script>
+<style>
+:root {
+  color-scheme: light;
+  --cp-bg: #f7f4ef;
+  --cp-bg-elevated: #fcfbf8;
+  --cp-surface: #ffffff;
+  --cp-surface-soft: #f5f5f5;
+  --cp-border: #dedede;
+  --cp-border-strong: #919191;
+  --cp-text: #242424;
+  --cp-text-muted: #5c5c5c;
+  --cp-text-soft: #6f6f6f;
+  --cp-accent: #b11f4b;
+  --cp-accent-hover: #9a1a41;
+  --cp-accent-soft: rgba(177, 31, 75, 0.08);
+  --cp-accent-fg: #ffffff;
+  --cp-success: #16a34a;
+  --cp-danger: #dc2626;
+  --cp-warning: #f59e0b;
+  --cp-link: #0078d4;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+  --cp-overlay: rgba(255, 255, 255, 0.8);
+  --cp-panel: rgba(255, 255, 255, 0.86);
+  --cp-panel-strong: rgba(255, 255, 255, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.55);
+  --cp-highlight: rgba(177, 31, 75, 0.12);
+}
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --cp-bg: #3d3b3a;
+  --cp-bg-elevated: #343231;
+  --cp-surface: #292929;
+  --cp-surface-soft: #2e2e2e;
+  --cp-border: #474747;
+  --cp-border-strong: #5f5f5f;
+  --cp-text: #dedede;
+  --cp-text-muted: #919191;
+  --cp-text-soft: #b0b0b0;
+  --cp-accent: #fd8ea1;
+  --cp-accent-hover: #fb7b91;
+  --cp-accent-soft: rgba(253, 142, 161, 0.14);
+  --cp-accent-fg: #1a1a1a;
+  --cp-success: #4ade80;
+  --cp-danger: #f87171;
+  --cp-warning: #fbbf24;
+  --cp-link: #4da6ff;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+  --cp-overlay: rgba(41, 41, 41, 0.88);
+  --cp-panel: rgba(41, 41, 41, 0.72);
+  --cp-panel-strong: rgba(41, 41, 41, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.04);
+  --cp-highlight: rgba(253, 142, 161, 0.12);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--cp-bg); color: var(--cp-text);
+  font-family: "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 15px; line-height: 1.45;
+}
+header {
+  position: sticky; top: 0; z-index: 10; background: var(--cp-panel-strong);
+  border-bottom: 1px solid var(--cp-border); backdrop-filter: blur(6px);
+}
+.bar { max-width: 960px; margin: 0 auto; padding: 12px 16px 0; display: flex; align-items: center; gap: 12px; }
+.bar h1 { font-size: 18px; margin: 0; flex: 1; }
+.bar h1 span { color: var(--cp-accent); }
+nav { max-width: 960px; margin: 0 auto; display: flex; gap: 4px; padding: 8px 12px 0; overflow-x: auto; scrollbar-width: none; }
+nav::-webkit-scrollbar { display: none; }
+@media (max-width: 480px) { nav button { padding: 8px 10px; } }
+nav button {
+  border: none; background: none; color: var(--cp-text-muted); font: inherit; font-weight: 600;
+  padding: 8px 14px; border-bottom: 3px solid transparent; cursor: pointer; white-space: nowrap;
+}
+nav button.active { color: var(--cp-accent); border-bottom-color: var(--cp-accent); }
+main { max-width: 960px; margin: 0 auto; padding: 16px; }
+.card {
+  background: var(--cp-surface); border: 1px solid var(--cp-border); border-radius: 16px;
+  box-shadow: 0 0 2px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.14);
+  padding: 16px; margin-bottom: 16px;
+}
+.card h2 { font-size: 17px; margin: 0 0 10px; }
+.card h3 { font-size: 15px; margin: 14px 0 6px; }
+.muted { color: var(--cp-text-muted); }
+.small { font-size: 13px; }
+.pills { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.pill {
+  border: 1px solid var(--cp-border); background: var(--cp-surface); color: var(--cp-text);
+  border-radius: 0.625rem; padding: 6px 12px; font: inherit; cursor: pointer;
+}
+.pill.active { background: var(--cp-accent); color: var(--cp-accent-fg); border-color: var(--cp-accent); }
+.pill.today:not(.active) { border-color: var(--cp-accent); color: var(--cp-accent); }
+.btn {
+  border: 1px solid var(--cp-border-strong); background: var(--cp-surface); color: var(--cp-text);
+  border-radius: 0.625rem; padding: 6px 12px; font: inherit; cursor: pointer;
+}
+.btn:hover { border-color: var(--cp-accent); }
+.btn.primary { background: var(--cp-accent); color: var(--cp-accent-fg); border-color: var(--cp-accent); }
+.btn.primary:hover { background: var(--cp-accent-hover); }
+.btn.icon { padding: 4px 8px; }
+.btn.danger:hover { border-color: var(--cp-danger); color: var(--cp-danger); }
+.tag {
+  display: inline-block; background: var(--cp-accent-soft); color: var(--cp-accent);
+  border-radius: 0.625rem; padding: 2px 8px; font-size: 12px; font-weight: 600;
+}
+.meal { display: flex; gap: 12px; padding: 10px 0; border-top: 1px solid var(--cp-border); align-items: flex-start; }
+.meal:first-of-type { border-top: none; }
+.meal .time { width: 52px; flex-shrink: 0; font-weight: 700; color: var(--cp-accent); }
+.meal .body { flex: 1; }
+.meal .name { font-weight: 600; }
+.macros { display: flex; gap: 10px; font-size: 12px; color: var(--cp-text-muted); margin-top: 3px; flex-wrap: wrap; }
+.macros b { color: var(--cp-text); }
+.meal.done .body { opacity: 0.5; text-decoration: line-through; }
+input[type=checkbox] { width: 20px; height: 20px; accent-color: var(--cp-accent); cursor: pointer; flex-shrink: 0; margin-top: 2px; }
+.totals { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 10px; }
+.stat { background: var(--cp-surface-soft); border-radius: 0.625rem; padding: 8px; text-align: center; }
+.stat .v { font-size: 18px; font-weight: 700; }
+.stat .l { font-size: 12px; color: var(--cp-text-muted); }
+.progress { height: 6px; background: var(--cp-surface-soft); border-radius: 3px; overflow: hidden; margin-top: 8px; }
+.progress div { height: 100%; background: var(--cp-accent); transition: width .2s; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { text-align: left; background: var(--cp-surface-soft); color: var(--cp-text-muted); font-weight: 600; font-size: 13px; }
+th, td { padding: 7px 8px; border-bottom: 1px solid var(--cp-border); vertical-align: top; }
+td.num, th.num { text-align: center; white-space: nowrap; }
+tr.dayrow td { background: var(--cp-accent-soft); color: var(--cp-accent); font-weight: 700; }
+tr.total td { font-weight: 700; }
+.tablewrap { overflow-x: auto; }
+ul { margin: 6px 0; padding-left: 20px; }
+li { margin: 3px 0; }
+.ex { display: flex; gap: 10px; padding: 8px 0; border-top: 1px solid var(--cp-border); align-items: flex-start; }
+.ex:first-of-type { border-top: none; }
+.ex .body { flex: 1; }
+.ex.done .body { opacity: 0.5; text-decoration: line-through; }
+.week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.week div { background: var(--cp-surface-soft); border-radius: 0.625rem; padding: 8px; font-size: 13px; }
+.week div b { display: block; color: var(--cp-accent); }
+@media (max-width: 640px) { .week { grid-template-columns: repeat(2, 1fr); } .totals { grid-template-columns: repeat(2, 1fr); } }
+.shop-toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; align-items: center; }
+.shop-cat { margin-top: 14px; font-weight: 700; color: var(--cp-accent); font-size: 13px; text-transform: uppercase; letter-spacing: .04em; }
+.shop-item { display: flex; gap: 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--cp-border); }
+.shop-item .body { flex: 1; min-width: 0; }
+.shop-item .qty { color: var(--cp-text-muted); font-size: 13px; }
+.shop-item .note { color: var(--cp-text-soft); font-size: 12px; }
+.shop-item.checked .body { opacity: 0.45; text-decoration: line-through; }
+.shop-item input[type=text] {
+  width: 100%; font: inherit; padding: 4px 6px; border: 1px solid var(--cp-border-strong);
+  border-radius: 6px; background: var(--cp-bg-elevated); color: var(--cp-text); margin: 2px 0;
+}
+.addform { display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 8px; }
+.addform input, .addform select {
+  font: inherit; padding: 6px 8px; border: 1px solid var(--cp-border-strong); border-radius: 0.625rem;
+  background: var(--cp-bg-elevated); color: var(--cp-text); min-width: 0;
+}
+@media (max-width: 640px) { .addform { grid-template-columns: 1fr 1fr; } }
+.toast {
+  position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--cp-text);
+  color: var(--cp-bg); padding: 8px 16px; border-radius: 0.625rem; opacity: 0; transition: opacity .2s; pointer-events: none;
+}
+.toast.show { opacity: 1; }
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <h1>105 → <span>90 kg</span> plan</h1>
+    <button class="btn icon" id="themeBtn" title="Toggle theme">◐</button>
+  </div>
+  <nav id="tabs">
+    <button data-tab="today">Today</button>
+    <button data-tab="meals">Meal plan</button>
+    <button data-tab="training">Training</button>
+    <button data-tab="shopping">Shopping list</button>
+  </nav>
+</header>
+<main>
+  <section id="tab-today"></section>
+  <section id="tab-meals" class="hidden"></section>
+  <section id="tab-training" class="hidden"></section>
+  <section id="tab-shopping" class="hidden"></section>
+</main>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===================== DATA ===================== */
+const DAYS = ["mon","tue","wed","thu","fri","sat","sun"];
+const DAY_NAMES = { mon:"Monday", tue:"Tuesday", wed:"Wednesday", thu:"Thursday", fri:"Friday", sat:"Saturday", sun:"Sunday" };
+
+const MENU = {
+  mon: { tag: "Strength A", meals: [
+    { t:"10:00", n:"Omelette", d:"3 eggs + 100 g cottage cheese stirred in + 100 g peppers, 50 g mushrooms, 100 g tomatoes + 1 tsp olive oil + 1 small wholemeal tortilla (40 g)", k:510, p:40, c:34, f:24 },
+    { t:"12:00", n:"Strength session A", d:"See Training tab", train:true },
+    { t:"13:30", n:"Sardines & rice", d:"2 cans sardines in olive oil, drained (180 g) + 200 g rice + 200 g salad (tomato, cucumber, onion, pepper) + lemon", k:680, p:51, c:64, f:22 },
+    { t:"16:30", n:"Snack", d:"1 apple + 120 g cottage cheese (rest of pack) + 15 g pistachios", k:255, p:20, c:27, f:9 },
+    { t:"19:00", n:"Pork tenderloin", d:"200 g pork tenderloin + 300 g roasted broccoli, courgette, peppers + 1 tbsp olive oil", k:440, p:48, c:14, f:18 },
+  ]},
+  tue: { tag: "BJJ 19:00", meals: [
+    { t:"10:00", n:"Egg wrap", d:"3 eggs + 60 g smoked salmon + 1 wholemeal tortilla + 100 g tomato + 1 tsp oil + 15 g pistachios", k:555, p:37, c:29, f:32 },
+    { t:"13:30", n:"Beef steak & rice", d:"200 g lean beef steak + 200 g rice + 200 g peppers, mushrooms, onion + 1 tsp oil", k:635, p:51, c:65, f:17 },
+    { t:"17:00", n:"Pre-training", d:"1 can tuna in water (110 g drained) on 2 rice cakes + 1 banana", k:300, p:31, c:42, f:2 },
+    { t:"19:00", n:"Jiu jitsu", d:"Training", train:true },
+    { t:"21:00", n:"Salmon & potatoes", d:"180 g salmon + 250 g boiled potatoes + 150 g green beans", k:640, p:44, c:60, f:25 },
+  ]},
+  wed: { tag: "Optional noon BJJ / stairs", meals: [
+    { t:"10:00", n:"Omelette", d:"3 eggs + 30 g parmesan + 100 g mushrooms + 50 g onion + 1 tsp oil + 15 g pistachios", k:510, p:36, c:14, f:34 },
+    { t:"13:30", n:"Chicken souvlaki", d:"200 g chicken breast + 1 tsp oil + 1 large pitta (90 g) + 200 g tomato, cucumber, onion salad + 30 g olives", k:590, p:57, c:59, f:13 },
+    { t:"15:00", n:"🍨 Ice cream #1", d:"100 g pistachio ice cream, in a bowl", k:220, p:4, c:25, f:12 },
+    { t:"17:00", n:"Fruit", d:"1 apple", k:80, p:0, c:20, f:0 },
+    { t:"19:00", n:"Chicken breast", d:"200 g chicken breast + 150 g grilled mushrooms + 150 g pepper & rocket salad + 1 tbsp oil. Cook 280 g raw – keep 80 g cooked for Thursday breakfast. If you trained at noon: + 150 g rice/potatoes", k:400, p:53, c:11, f:15 },
+  ]},
+  thu: { tag: "BJJ 19:00", meals: [
+    { t:"10:00", n:"Egg wrap", d:"2 eggs + 80 g cooked chicken (from Wed) + 1 wholemeal tortilla + 100 g tomato + 1 tsp oil + 15 g pistachios", k:540, p:45, c:29, f:28 },
+    { t:"13:30", n:"Pork loin & bulgur", d:"200 g pork loin + 200 g bulgur or rice + 250 g roasted vegetables + 1 tsp oil", k:570, p:53, c:49, f:18 },
+    { t:"17:00", n:"Pre-training", d:"250 g kefir + 1 banana", k:215, p:10, c:37, f:4 },
+    { t:"19:00", n:"Jiu jitsu", d:"Training", train:true },
+    { t:"21:00", n:"Chicken traybake", d:"200 g skinless chicken thighs + 250 g potatoes + 250 g carrots, onion, peppers + 1 tbsp oil", k:655, p:47, c:68, f:22 },
+  ]},
+  fri: { tag: "Strength B", meals: [
+    { t:"10:00", n:"Cottage cheese bowl", d:"220 g cottage cheese + 150 g mixed berries + 15 g pistachios + 1 banana", k:430, p:37, c:53, f:11 },
+    { t:"12:00", n:"Strength session B", d:"See Training tab", train:true },
+    { t:"13:30", n:"Sea bass & potatoes", d:"200 g sea bass + 250 g potatoes + 200 g salad + 1 tbsp oil", k:565, p:44, c:58, f:17 },
+    { t:"16:30", n:"Snack", d:"1 can tuna in water (110 g drained) on 2 rice cakes", k:195, p:30, c:15, f:2 },
+    { t:"19:00", n:"Lettuce-wrap burgers", d:"2 lean beef patties (200 g, 5% fat) in lettuce wraps + 20 g mature cheddar + 80 g avocado + tomato & onion + 150 g vinegar coleslaw", k:580, p:52, c:27, f:32 },
+  ]},
+  sat: { tag: "Walk / bike / stairs", weekend:true, meals: [
+    { t:"~10:00", n:"Breakfast", d:"Repeat any weekday breakfast (omelette, egg wrap or cottage cheese bowl)" },
+    { t:"13:30", n:"Lunch", d:"Full plate: 2 palms protein + 2 fists veg + 1 cupped hand carbs + 1 thumb fat" },
+    { t:"~20:00", n:"Dinner (out or home)", d:"Protein + veg first, then ONE extra – dessert OR alcohol OR bread/fries. 🍨 Ice cream #2 can go here." },
+  ]},
+  sun: { tag: "Rest + measure", weekend:true, meals: [
+    { t:"~10:00", n:"Breakfast", d:"Repeat any weekday breakfast" },
+    { t:"13:30", n:"Lunch", d:"Full plate: 2 palms protein + 2 fists veg + 1 cupped hand carbs + 1 thumb fat" },
+    { t:"~20:00", n:"Dinner", d:"Protein + veg (no carbs on rest days). Kitchen closes after dinner." },
+  ]},
+};
+
+const STRENGTH = {
+  A: { name: "Session A – Monday (30–40 min)", ex: [
+    ["Bulgarian split squat (back foot on stair/sofa)", "3 × 8–12 / leg", "Bodyweight → hold dumbbells"],
+    ["Push-ups", "3 × (max − 2)", "Hands elevated → floor → feet elevated"],
+    ["Band row (band anchored in door)", "3 × 12–15", "Thicker band, slower lowering"],
+    ["Single-leg Romanian deadlift", "3 × 8–10 / leg", "Bodyweight → dumbbell"],
+    ["Plank + side plank", "3 × 30–45 s", "+5 s per week"],
+  ]},
+  B: { name: "Session B – Friday (30–40 min)", ex: [
+    ["Stair step-ups (2 steps at a time)", "3 × 10 / leg", "Add dumbbells"],
+    ["Pike push-up or dumbbell shoulder press", "3 × 8–12", "Feet higher / heavier dumbbells"],
+    ["One-arm dumbbell row", "3 × 10–12 / arm", "Heavier dumbbell"],
+    ["Glute bridge → single-leg glute bridge", "3 × 12–15", "Single leg, 2 s pause at top"],
+    ["Dead bug", "3 × 10 / side", "Slower, arms/legs straighter"],
+    ["Farmer's carry (heavy dumbbells)", "3 × 30–40 m", "Heavier / longer – gi grip 💪"],
+  ]},
+  STAIRS: { name: "Stairs conditioning (~10–12 min)", ex: [
+    ["Warm-up: easy walk up & down", "2 rounds", ""],
+    ["Climb briskly, walk down", "8–10 rounds", "Add a round every 1–2 weeks"],
+  ]},
+};
+
+const TRAINING_BY_DAY = {
+  mon: { title: "Strength A", sub: "Or BJJ 12:00 – if you do BJJ, move strength A to the next free day.", plan: "A" },
+  tue: { title: "Jiu jitsu 19:00", sub: "Eat the 17:00 snack. Post-training dinner is pre-plated." },
+  wed: { title: "Optional BJJ 12:00 or stairs", sub: "If no BJJ, do the stairs session.", plan: "STAIRS" },
+  thu: { title: "Jiu jitsu 19:00", sub: "Eat the 17:00 snack. Post-training dinner is pre-plated." },
+  fri: { title: "Strength B", sub: "Or BJJ 12:00 – if you do BJJ, move strength B to the next free day.", plan: "B" },
+  sat: { title: "Active day", sub: "Walk, bike with your kid, or stairs session.", plan: "STAIRS" },
+  sun: { title: "Rest", sub: "Measure your waist at the navel. Note this week's average weight." },
+};
+
+const DEFAULT_SHOPPING = [
+  ["Meat","Chicken breast","~500 g","Wed souvlaki (200 g) + Wed dinner (280 g)"],
+  ["Meat","Chicken thighs, skinless","200 g","Thu traybake"],
+  ["Meat","Pork tenderloin","200 g","Mon dinner"],
+  ["Meat","Pork loin","200 g","Thu lunch"],
+  ["Meat","Lean beef steak (sirloin/rump)","200 g","Tue lunch"],
+  ["Meat","Lean beef mince 5% (or 2 lean patties)","200 g","Fri burgers"],
+  ["Fish","Salmon fillet","180 g","Tue dinner"],
+  ["Fish","Sea bass fillets","200 g","Fri lunch"],
+  ["Fish","Smoked salmon","1 small pack (~100 g)","Tue breakfast (60 g)"],
+  ["Fish","Sardines in olive oil","2 cans","Mon lunch"],
+  ["Fish","Tuna in water","2 cans","Tue 17:00, Fri 16:30"],
+  ["Eggs & dairy","Eggs","12","Mon–Thu breakfasts (11)"],
+  ["Eggs & dairy","Cottage cheese (220 g pack)","2 packs","Mon breakfast + snack, Fri breakfast"],
+  ["Eggs & dairy","Kefir (500 g bottle)","1 bottle","Thu 17:00 (250 g)"],
+  ["Vegetables","Peppers","4 (~600 g)","Omelettes, salads, roasts"],
+  ["Vegetables","Tomatoes","~500 g","Breakfasts, salads, burgers"],
+  ["Vegetables","Mushrooms","~400 g","Mon, Tue, Wed"],
+  ["Vegetables","Onions (red + white)","4","Salads, omelette, traybake"],
+  ["Vegetables","Cucumber","1","Salads"],
+  ["Vegetables","Broccoli","1 head (~350 g)","Mon dinner, Thu roast veg"],
+  ["Vegetables","Courgettes","2","Mon dinner, Thu roast veg"],
+  ["Vegetables","Green beans","~200 g","Tue dinner"],
+  ["Vegetables","Carrots","3","Thu traybake, coleslaw"],
+  ["Vegetables","White cabbage or coleslaw mix","~150 g","Fri coleslaw"],
+  ["Vegetables","Lettuce + rocket","1 + 1 bag","Burger wraps, salads"],
+  ["Vegetables","Potatoes","1 kg","Tue, Thu, Fri (+ Wed if BJJ)"],
+  ["Vegetables","Avocado","1","Fri burger"],
+  ["Fruit","Bananas","3","Tue, Thu, Fri"],
+  ["Fruit","Apples","2","Mon, Wed"],
+  ["Fruit","Berries (frozen is fine)","150 g","Fri breakfast"],
+  ["Fruit","Lemons","2","Sardines, chicken, fish"],
+  ["Bread","Small wholemeal tortillas","1 pack","Mon, Tue, Thu breakfasts"],
+  ["Bread","Large pitta","1","Wed souvlaki"],
+  ["Treat","Pistachio ice cream cups (~100 g)","2","Wed + weekend"],
+  ["Pantry","Unsalted pistachios in shell","~200 g","15 g shelled / day"],
+  ["Pantry","Rice / bulgur (dry)","~200 g","~600 g cooked"],
+  ["Pantry","Rice cakes","4","Tue, Fri snacks"],
+  ["Pantry","Olive oil","~100 ml",""],
+  ["Pantry","Parmesan + mature cheddar","30 g + 20 g","Wed omelette, Fri burger"],
+  ["Pantry","Olives","30 g","Wed souvlaki"],
+  ["Pantry","Vinegar, mustard, garlic, herbs & spices","",""],
+];
+const CATEGORIES = ["Meat","Fish","Eggs & dairy","Vegetables","Fruit","Bread","Treat","Pantry","Other"];
+
+/* ===================== HELPERS ===================== */
+const $ = (s, el = document) => el.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, ch => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[ch]));
+const load = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v ?? d; } catch { return d; } };
+const save = (k, v) => localStorage.setItem(k, JSON.stringify(v));
+function toast(msg) { const t = $("#toast"); t.textContent = msg; t.classList.add("show"); setTimeout(() => t.classList.remove("show"), 1600); }
+const todayKey = () => DAYS[(new Date().getDay() + 6) % 7];
+function dateForDay(day) {
+  const now = new Date(); const offset = DAYS.indexOf(day) - (now.getDay() + 6) % 7;
+  const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + offset);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+}
+const sum = (meals, key) => meals.reduce((a, m) => a + (m[key] || 0), 0);
+
+/* ===================== TABS ===================== */
+function showTab(name) {
+  document.querySelectorAll("#tabs button").forEach(b => b.classList.toggle("active", b.dataset.tab === name));
+  document.querySelectorAll("main > section").forEach(s => s.classList.toggle("hidden", s.id !== "tab-" + name));
+  localStorage.setItem("wl-tab", name);
+}
+$("#tabs").addEventListener("click", e => { if (e.target.dataset.tab) showTab(e.target.dataset.tab); });
+$("#themeBtn").addEventListener("click", () => {
+  const next = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+  document.documentElement.setAttribute("data-theme", next); localStorage.setItem("wl-theme", next);
+});
+
+/* ===================== TODAY ===================== */
+let selDay = todayKey();
+function exerciseList(planKey, doneMap, prefix) {
+  const p = STRENGTH[planKey];
+  return `<h3>${esc(p.name)}</h3>` + p.ex.map((e, i) => {
+    const id = `${prefix}${planKey}-${i}`;
+    return `<label class="ex ${doneMap[id] ? "done" : ""}"><input type="checkbox" data-done="${id}" ${doneMap[id] ? "checked" : ""}>
+      <div class="body"><div><b>${esc(e[0])}</b> · ${esc(e[1])}</div>${e[2] ? `<div class="small muted">${esc(e[2])}</div>` : ""}</div></label>`;
+  }).join("");
+}
+function renderToday() {
+  const dateKey = "wl-done-" + dateForDay(selDay);
+  const done = load(dateKey, {});
+  const m = MENU[selDay], tr = TRAINING_BY_DAY[selDay];
+  const tracked = m.meals.map((x, i) => ({ x, i })).filter(o => !o.x.train);
+  const eaten = tracked.filter(o => done["m" + o.i]);
+  const pct = tracked.length ? Math.round(eaten.length / tracked.length * 100) : 0;
+
+  const pills = DAYS.map(d => `<button class="pill ${d === selDay ? "active" : ""} ${d === todayKey() ? "today" : ""}" data-day="${d}">${DAY_NAMES[d].slice(0,3)}</button>`).join("");
+  const meals = m.meals.map((x, i) => {
+    const id = "m" + i;
+    if (x.train) return `<div class="meal"><span style="width:20px"></span><div class="time">${esc(x.t)}</div><div class="body"><span class="tag">🥋 ${esc(x.n)}</span></div></div>`;
+    return `<label class="meal ${done[id] ? "done" : ""}"><input type="checkbox" data-done="${id}" ${done[id] ? "checked" : ""}>
+      <div class="time">${esc(x.t)}</div>
+      <div class="body"><div class="name">${esc(x.n)}</div><div class="small">${esc(x.d)}</div>
+      ${x.k ? `<div class="macros"><span><b>${x.k}</b> kcal</span><span>P <b>${x.p}</b> g</span><span>C <b>${x.c}</b> g</span><span>F <b>${x.f}</b> g</span></div>` : ""}</div></label>`;
+  }).join("");
+  const stats = m.weekend ? `<p class="small muted">Weekend: follow the portion guide (Meal plan tab). Kitchen closes after dinner.</p>` : `
+    <div class="totals">
+      <div class="stat"><div class="v">${sum(m.meals,"k").toLocaleString()}</div><div class="l">kcal</div></div>
+      <div class="stat"><div class="v">${sum(m.meals,"p")} g</div><div class="l">protein</div></div>
+      <div class="stat"><div class="v">${sum(m.meals,"c")} g</div><div class="l">carbs</div></div>
+      <div class="stat"><div class="v">${sum(m.meals,"f")} g</div><div class="l">fat</div></div>
+    </div>`;
+  const progress = `<div class="progress"><div style="width:${pct}%"></div></div>
+    <div class="small muted" style="margin-top:4px">${eaten.length} of ${tracked.length} meals done</div>`;
+
+  $("#tab-today").innerHTML = `
+    <div class="pills">${pills}</div>
+    <div class="card">
+      <h2>🍽️ ${DAY_NAMES[selDay]} meals <span class="tag">${esc(m.tag)}</span></h2>
+      ${meals}${stats}${progress}
+    </div>
+    <div class="card">
+      <h2>🏋️ Training – ${esc(tr.title)}</h2>
+      <p class="small muted">${esc(tr.sub)}</p>
+      ${tr.plan ? exerciseList(tr.plan, done, "x") : ""}
+    </div>
+    <div class="card small">
+      <b>Daily rules:</b> eating window ~10:00 → 19:30/20:00 · 15 g pistachios before the evening · 2.5–3 L water · late snack = fruit, herbal tea or Cola Zero.
+    </div>`;
+}
+$("#tab-today").addEventListener("click", e => {
+  const d = e.target.closest("[data-day]"); if (d) { selDay = d.dataset.day; renderToday(); }
+});
+$("#tab-today").addEventListener("change", e => {
+  const id = e.target.dataset.done; if (!id) return;
+  const key = "wl-done-" + dateForDay(selDay); const done = load(key, {});
+  if (e.target.checked) done[id] = true; else delete done[id];
+  save(key, done); renderToday();
+});
+
+/* ===================== MEAL PLAN ===================== */
+function renderMeals() {
+  const rows = DAYS.filter(d => !MENU[d].weekend).map(d => {
+    const m = MENU[d];
+    const body = m.meals.filter(x => !x.train).map(x => `<tr><td>${esc(x.t)}</td><td><b>${esc(x.n)}</b> – ${esc(x.d)}</td><td class="num">${x.k}</td><td class="num">${x.p}</td><td class="num">${x.c}</td><td class="num">${x.f}</td></tr>`).join("");
+    return `<tr class="dayrow"><td colspan="6">${DAY_NAMES[d]} – ${esc(m.tag)}</td></tr>${body}
+      <tr class="total"><td></td><td>Day total</td><td class="num">~${sum(m.meals,"k").toLocaleString()}</td><td class="num">${sum(m.meals,"p")}</td><td class="num">${sum(m.meals,"c")}</td><td class="num">${sum(m.meals,"f")}</td></tr>`;
+  }).join("");
+  $("#tab-meals").innerHTML = `
+    <div class="card">
+      <h2>Targets</h2>
+      <ul>
+        <li><b>~1,800–1,900 kcal</b> on rest/strength days, <b>~2,000–2,150</b> on BJJ days</li>
+        <li><b>Protein ~150–165 g/day</b> · eating window <b>~10:00 → 19:30/20:00</b>, then kitchen closes</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>Portion guide (per main meal)</h2>
+      <div class="tablewrap"><table>
+        <tr><th>Component</th><th>Portion</th><th>Examples</th></tr>
+        <tr><td>Protein</td><td><b>2 palms</b></td><td>Chicken, beef, pork, fish (sardines, tuna, salmon, sea bass), 3–4 eggs, cottage cheese, kefir</td></tr>
+        <tr><td>Vegetables</td><td><b>2 fists</b></td><td>Salads, peppers, broccoli, courgette, cabbage, mushrooms, tomatoes, green beans</td></tr>
+        <tr><td>Carbs</td><td><b>0–1 cupped hand</b></td><td>Rice, potatoes, bulgur, wholemeal tortilla, pitta, rice cakes, fruit</td></tr>
+        <tr><td>Fats</td><td><b>1 thumb</b></td><td>Olive oil, avocado, parmesan, mature cheddar, unsalted pistachios</td></tr>
+      </table></div>
+      <p class="small"><b>Carb rule:</b> 1 cupped hand at meals before/after training. Rest days: carbs at lunch only – dinner = protein + veg.</p>
+    </div>
+    <div class="card">
+      <h2>Weekly menu – Monday to Friday</h2>
+      <p class="small muted">Meat/fish raw weight; rice, bulgur, potatoes cooked weight. P/C/F in grams, ±10–15% by brand.</p>
+      <div class="tablewrap"><table>
+        <tr><th>Time</th><th>Meal</th><th class="num">kcal</th><th class="num">P</th><th class="num">C</th><th class="num">F</th></tr>
+        ${rows}
+      </table></div>
+    </div>
+    <div class="card">
+      <h2>Rules that make it work</h2>
+      <ul>
+        <li>🍨 <b>Ice cream:</b> 2× per week, ~100 g, in a bowl or single cup – never from the tub, not late at night.</li>
+        <li>🥜 <b>Pistachios:</b> 15 g unsalted (~25 nuts) per day, before the evening.</li>
+        <li>🍽️ <b>Eating out:</b> protein + veg first, then ONE extra – dessert OR alcohol OR bread/fries.</li>
+        <li>🥋 <b>Post-training hunger:</b> 17:00 snack + a pre-plated dinner waiting = no kitchen raids.</li>
+        <li>🥛 <b>Lactose-friendly:</b> cottage cheese, kefir, aged hard cheese. No processed meats.</li>
+        <li>🎄 <b>Christmas:</b> planned 2-week maintenance break – maintenance, not "anything goes".</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>Phases & keeping it off</h2>
+      <div class="tablewrap"><table>
+        <tr><th>Phase</th><th>When</th><th>Focus</th></tr>
+        <tr><td>1. Competition prep</td><td>Now → 1 Nov</td><td>~0.5 kg/week, carbs around training, no crash dieting</td></tr>
+        <tr><td>2. Main fat loss</td><td>Nov → ~Apr 2027</td><td>~0.5–0.75 kg/week, protein + veg + low carb</td></tr>
+        <tr><td>3. Keep it off</td><td>From 90 kg</td><td>Add carbs back over 2–4 weeks. <b>Ceiling rule:</b> weekly average &gt; 93 kg → 3 weeks of phase 2 rules</td></tr>
+      </table></div>
+    </div>`;
+}
+
+/* ===================== TRAINING ===================== */
+function renderTraining() {
+  const week = DAYS.map(d => `<div><b>${DAY_NAMES[d].slice(0,3)}</b>${esc(TRAINING_BY_DAY[d].title)}</div>`).join("");
+  const sess = k => `<div class="tablewrap"><table><tr><th>Exercise</th><th>Sets × reps</th><th>Progression</th></tr>${STRENGTH[k].ex.map(e => `<tr><td>${esc(e[0])}</td><td>${esc(e[1])}</td><td>${esc(e[2])}</td></tr>`).join("")}</table></div>`;
+  $("#tab-training").innerHTML = `
+    <div class="card">
+      <h2>Weekly schedule</h2>
+      <div class="week">${week}</div>
+      <p class="small muted">If you do noon BJJ on Mon/Fri, move that strength session to the next free day. Avoid hard leg work the day before Tue/Thu BJJ.</p>
+    </div>
+    <div class="card">
+      <h2>How to train</h2>
+      <ul>
+        <li>Stop each set ~2 reps before failure, rest 60–90 s.</li>
+        <li><b>Weeks 1–2:</b> 2 sets per exercise, then 3 sets.</li>
+        <li>Goal: keep (or build) muscle while losing fat, and perform well in BJJ.</li>
+      </ul>
+    </div>
+    <div class="card"><h2>${esc(STRENGTH.A.name)}</h2>${sess("A")}</div>
+    <div class="card"><h2>${esc(STRENGTH.B.name)}</h2>${sess("B")}</div>
+    <div class="card">
+      <h2>Conditioning & steps</h2>
+      <ul>
+        <li><b>Stairs (Wed or weekend):</b> 8–10 rounds – climb briskly, walk down (~10–12 min).</li>
+        <li><b>Steps:</b> 6,000 → <b>8,000</b> in October → <b>10,000</b> from November. 15-min walk after lunch on WFH days; biking to school counts.</li>
+        <li><b>Optional:</b> doorway pull-up bar – best bodyweight pulling and grip work for BJJ.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>🥋 Competition – GB Compnet, 1 November</h2>
+      <ul>
+        <li><b>Last strength session: Mon 26 Oct</b>, light (2 sets). Nothing heavy after that.</li>
+        <li>Competition week: lower BJJ intensity, sleep 7.5–8 h, eat normally with carbs. Confirm the division weight limit.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>Tracking</h2>
+      <div class="tablewrap"><table>
+        <tr><th>What</th><th>How often</th><th>Note</th></tr>
+        <tr><td>Weight</td><td>3–7× / week, morning</td><td>Only the weekly average matters</td></tr>
+        <tr><td>Waist (at navel)</td><td>Every Sunday</td><td>Best fat-loss signal</td></tr>
+        <tr><td>Body-composition scale + photos</td><td>Monthly</td><td>Same conditions each time</td></tr>
+        <tr><td>Blood tests</td><td>Now + after 3–6 months</td><td>Glucose/HbA1c, lipids + ApoB/Lp(a), liver, kidney, TSH, vit D, B12, ferritin, hs-CRP</td></tr>
+      </table></div>
+    </div>`;
+}
+
+/* ===================== SHOPPING ===================== */
+const SHOP_KEY = "wl-shopping-v1";
+const defaultShop = () => DEFAULT_SHOPPING.map((r, i) => ({ id: "d" + i, cat: r[0], name: r[1], qty: r[2], note: r[3], checked: false }));
+let shop = load(SHOP_KEY, null) || defaultShop();
+let hideChecked = load("wl-hide-checked", false);
+let editing = null;
+const saveShop = () => save(SHOP_KEY, shop);
+
+function renderShopping() {
+  const left = shop.filter(i => !i.checked).length;
+  const cats = [...new Set([...CATEGORIES, ...shop.map(i => i.cat)])];
+  const list = cats.map(cat => {
+    const items = shop.filter(i => i.cat === cat && !(hideChecked && i.checked));
+    if (!items.length) return "";
+    return `<div class="shop-cat">${esc(cat)}</div>` + items.map(i => editing === i.id ? `
+      <div class="shop-item" data-id="${esc(i.id)}">
+        <div class="body">
+          <input type="text" data-f="name" value="${esc(i.name)}" placeholder="Item">
+          <input type="text" data-f="qty" value="${esc(i.qty)}" placeholder="Amount">
+          <input type="text" data-f="note" value="${esc(i.note)}" placeholder="Note">
+        </div>
+        <button class="btn icon primary" data-act="saveedit">Save</button>
+      </div>` : `
+      <div class="shop-item ${i.checked ? "checked" : ""}" data-id="${esc(i.id)}">
+        <input type="checkbox" data-act="toggle" ${i.checked ? "checked" : ""}>
+        <div class="body"><div>${esc(i.name)} ${i.qty ? `<span class="qty">· ${esc(i.qty)}</span>` : ""}</div>${i.note ? `<div class="note">${esc(i.note)}</div>` : ""}</div>
+        <button class="btn icon" data-act="edit" title="Edit">✏️</button>
+        <button class="btn icon danger" data-act="del" title="Delete">🗑️</button>
+      </div>`).join("");
+  }).join("");
+
+  $("#tab-shopping").innerHTML = `
+    <div class="card">
+      <h2>🛒 Weekly shopping list <span class="tag">${left} left</span></h2>
+      <p class="small muted">Your portions, Monday–Friday. Scale up family dinners and add weekend meals. Changes are saved on this device.</p>
+      <div class="shop-toolbar">
+        <button class="btn primary" data-act="newweek">New week (untick all)</button>
+        <button class="btn" data-act="hide">${hideChecked ? "Show" : "Hide"} ticked</button>
+        <button class="btn" data-act="copy">Copy list</button>
+        <button class="btn danger" data-act="reset">Reset to default</button>
+      </div>
+      <div class="addform">
+        <input id="newName" placeholder="Add item…">
+        <input id="newQty" placeholder="Amount">
+        <select id="newCat">${CATEGORIES.map(c => `<option>${esc(c)}</option>`).join("")}</select>
+        <button class="btn primary" data-act="add">Add</button>
+      </div>
+      ${list || `<p class="muted">Everything is ticked 🎉</p>`}
+    </div>`;
+}
+$("#tab-shopping").addEventListener("click", e => {
+  const act = e.target.dataset.act; if (!act) return;
+  const row = e.target.closest(".shop-item"); const item = row && shop.find(i => i.id === row.dataset.id);
+  if (act === "toggle") { item.checked = e.target.checked; }
+  else if (act === "del") { if (!confirm(`Delete "${item.name}"?`)) return; shop = shop.filter(i => i !== item); }
+  else if (act === "edit") { editing = item.id; }
+  else if (act === "saveedit") {
+    row.querySelectorAll("input[data-f]").forEach(inp => item[inp.dataset.f] = inp.value.trim());
+    editing = null;
+  }
+  else if (act === "add") {
+    const name = $("#newName").value.trim(); if (!name) { $("#newName").focus(); return; }
+    shop.push({ id: "u" + Date.now(), cat: $("#newCat").value, name, qty: $("#newQty").value.trim(), note: "", checked: false });
+    toast("Added " + name);
+  }
+  else if (act === "newweek") { shop.forEach(i => i.checked = false); toast("Ready for a new week"); }
+  else if (act === "hide") { hideChecked = !hideChecked; save("wl-hide-checked", hideChecked); }
+  else if (act === "reset") { if (!confirm("Reset the list to the default plan? Your edits will be lost.")) return; shop = defaultShop(); }
+  else if (act === "copy") {
+    const text = shop.filter(i => !i.checked).map(i => `☐ ${i.name}${i.qty ? " – " + i.qty : ""}`).join("\n");
+    navigator.clipboard.writeText(text).then(() => toast("Copied to clipboard"), () => toast("Copy failed"));
+    return;
+  }
+  saveShop(); renderShopping();
+});
+$("#tab-shopping").addEventListener("keydown", e => {
+  if (e.key === "Enter" && (e.target.id === "newName" || e.target.id === "newQty")) $("[data-act=add]").click();
+});
+
+/* ===================== INIT ===================== */
+renderToday(); renderMeals(); renderTraining(); renderShopping();
+showTab(localStorage.getItem("wl-tab") || "today");
+</script>
+</body>
+</html>
