@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>105 → 90 kg Plan</title>
+<title>Family Plan – Razvan & Paula</title>
 <script>
   (() => {
     const saved = localStorage.getItem("wl-theme");
@@ -76,16 +76,19 @@ header {
   position: sticky; top: 0; z-index: 10; background: var(--cp-panel-strong);
   border-bottom: 1px solid var(--cp-border); backdrop-filter: blur(6px);
 }
-.bar { max-width: 960px; margin: 0 auto; padding: 12px 16px 0; display: flex; align-items: center; gap: 12px; }
-.bar h1 { font-size: 18px; margin: 0; flex: 1; }
+.bar { max-width: 960px; margin: 0 auto; padding: 12px 16px 0; display: flex; align-items: center; gap: 10px; }
+.bar h1 { font-size: 18px; margin: 0; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .bar h1 span { color: var(--cp-accent); }
+.who { display: flex; border: 1px solid var(--cp-border-strong); border-radius: 0.625rem; overflow: hidden; }
+.who button { border: none; background: var(--cp-surface); color: var(--cp-text); font: inherit; font-weight: 600; padding: 5px 12px; cursor: pointer; }
+.who button.active { background: var(--cp-accent); color: var(--cp-accent-fg); }
 nav { max-width: 960px; margin: 0 auto; display: flex; gap: 4px; padding: 8px 12px 0; overflow-x: auto; scrollbar-width: none; }
 nav::-webkit-scrollbar { display: none; }
-@media (max-width: 480px) { nav button { padding: 8px 10px; } }
 nav button {
   border: none; background: none; color: var(--cp-text-muted); font: inherit; font-weight: 600;
   padding: 8px 14px; border-bottom: 3px solid transparent; cursor: pointer; white-space: nowrap;
 }
+@media (max-width: 480px) { nav button { padding: 8px 10px; } .bar h1 { font-size: 16px; } }
 nav button.active { color: var(--cp-accent); border-bottom-color: var(--cp-accent); }
 main { max-width: 960px; margin: 0 auto; padding: 16px; }
 .card {
@@ -117,6 +120,7 @@ main { max-width: 960px; margin: 0 auto; padding: 16px; }
   display: inline-block; background: var(--cp-accent-soft); color: var(--cp-accent);
   border-radius: 0.625rem; padding: 2px 8px; font-size: 12px; font-weight: 600;
 }
+.note-box { background: var(--cp-accent-soft); border-left: 3px solid var(--cp-accent); border-radius: 0.625rem; padding: 10px 12px; font-size: 13px; margin-bottom: 16px; }
 .meal { display: flex; gap: 12px; padding: 10px 0; border-top: 1px solid var(--cp-border); align-items: flex-start; }
 .meal:first-of-type { border-top: none; }
 .meal .time { width: 52px; flex-shrink: 0; font-weight: 700; color: var(--cp-accent); }
@@ -177,7 +181,11 @@ li { margin: 3px 0; }
 <body>
 <header>
   <div class="bar">
-    <h1>105 → <span>90 kg</span> plan</h1>
+    <h1 id="title"></h1>
+    <div class="who" id="who">
+      <button data-who="razvan">Razvan</button>
+      <button data-who="paula">Paula</button>
+    </div>
     <button class="btn icon" id="themeBtn" title="Toggle theme">◐</button>
   </div>
   <nav id="tabs">
@@ -196,131 +204,321 @@ li { margin: 3px 0; }
 <div class="toast" id="toast"></div>
 
 <script>
-/* ===================== DATA ===================== */
+/* ===================== SHARED ===================== */
 const DAYS = ["mon","tue","wed","thu","fri","sat","sun"];
 const DAY_NAMES = { mon:"Monday", tue:"Tuesday", wed:"Wednesday", thu:"Thursday", fri:"Friday", sat:"Saturday", sun:"Sunday" };
 
-const MENU = {
-  mon: { tag: "Strength A", meals: [
-    { t:"10:00", n:"Omelette", d:"3 eggs + 100 g cottage cheese stirred in + 100 g peppers, 50 g mushrooms, 100 g tomatoes + 1 tsp olive oil + 1 small wholemeal tortilla (40 g)", k:510, p:40, c:34, f:24 },
-    { t:"12:00", n:"Strength session A", d:"See Training tab", train:true },
-    { t:"13:30", n:"Sardines & rice", d:"2 cans sardines in olive oil, drained (180 g) + 200 g rice + 200 g salad (tomato, cucumber, onion, pepper) + lemon", k:680, p:51, c:64, f:22 },
-    { t:"16:30", n:"Snack", d:"1 apple + 120 g cottage cheese (rest of pack) + 15 g pistachios", k:255, p:20, c:27, f:9 },
-    { t:"19:00", n:"Pork tenderloin", d:"200 g pork tenderloin + 300 g roasted broccoli, courgette, peppers + 1 tbsp olive oil", k:440, p:48, c:14, f:18 },
-  ]},
-  tue: { tag: "BJJ 19:00", meals: [
-    { t:"10:00", n:"Egg wrap", d:"3 eggs + 60 g smoked salmon + 1 wholemeal tortilla + 100 g tomato + 1 tsp oil + 15 g pistachios", k:555, p:37, c:29, f:32 },
-    { t:"13:30", n:"Beef steak & rice", d:"200 g lean beef steak + 200 g rice + 200 g peppers, mushrooms, onion + 1 tsp oil", k:635, p:51, c:65, f:17 },
-    { t:"17:00", n:"Pre-training", d:"1 can tuna in water (110 g drained) on 2 rice cakes + 1 banana", k:300, p:31, c:42, f:2 },
-    { t:"19:00", n:"Jiu jitsu", d:"Training", train:true },
-    { t:"21:00", n:"Salmon & potatoes", d:"180 g salmon + 250 g boiled potatoes + 150 g green beans", k:640, p:44, c:60, f:25 },
-  ]},
-  wed: { tag: "Optional noon BJJ / stairs", meals: [
-    { t:"10:00", n:"Omelette", d:"3 eggs + 30 g parmesan + 100 g mushrooms + 50 g onion + 1 tsp oil + 15 g pistachios", k:510, p:36, c:14, f:34 },
-    { t:"13:30", n:"Chicken souvlaki", d:"200 g chicken breast + 1 tsp oil + 1 large pitta (90 g) + 200 g tomato, cucumber, onion salad + 30 g olives", k:590, p:57, c:59, f:13 },
-    { t:"15:00", n:"🍨 Ice cream #1", d:"100 g pistachio ice cream, in a bowl", k:220, p:4, c:25, f:12 },
-    { t:"17:00", n:"Fruit", d:"1 apple", k:80, p:0, c:20, f:0 },
-    { t:"19:00", n:"Chicken breast", d:"200 g chicken breast + 150 g grilled mushrooms + 150 g pepper & rocket salad + 1 tbsp oil. Cook 280 g raw – keep 80 g cooked for Thursday breakfast. If you trained at noon: + 150 g rice/potatoes", k:400, p:53, c:11, f:15 },
-  ]},
-  thu: { tag: "BJJ 19:00", meals: [
-    { t:"10:00", n:"Egg wrap", d:"2 eggs + 80 g cooked chicken (from Wed) + 1 wholemeal tortilla + 100 g tomato + 1 tsp oil + 15 g pistachios", k:540, p:45, c:29, f:28 },
-    { t:"13:30", n:"Pork loin & bulgur", d:"200 g pork loin + 200 g bulgur or rice + 250 g roasted vegetables + 1 tsp oil", k:570, p:53, c:49, f:18 },
-    { t:"17:00", n:"Pre-training", d:"250 g kefir + 1 banana", k:215, p:10, c:37, f:4 },
-    { t:"19:00", n:"Jiu jitsu", d:"Training", train:true },
-    { t:"21:00", n:"Chicken traybake", d:"200 g skinless chicken thighs + 250 g potatoes + 250 g carrots, onion, peppers + 1 tbsp oil", k:655, p:47, c:68, f:22 },
-  ]},
-  fri: { tag: "Strength B", meals: [
-    { t:"10:00", n:"Cottage cheese bowl", d:"220 g cottage cheese + 150 g mixed berries + 15 g pistachios + 1 banana", k:430, p:37, c:53, f:11 },
-    { t:"12:00", n:"Strength session B", d:"See Training tab", train:true },
-    { t:"13:30", n:"Sea bass & potatoes", d:"200 g sea bass + 250 g potatoes + 200 g salad + 1 tbsp oil", k:565, p:44, c:58, f:17 },
-    { t:"16:30", n:"Snack", d:"1 can tuna in water (110 g drained) on 2 rice cakes", k:195, p:30, c:15, f:2 },
-    { t:"19:00", n:"Lettuce-wrap burgers", d:"2 lean beef patties (200 g, 5% fat) in lettuce wraps + 20 g mature cheddar + 80 g avocado + tomato & onion + 150 g vinegar coleslaw", k:580, p:52, c:27, f:32 },
-  ]},
-  sat: { tag: "Walk / bike / stairs", weekend:true, meals: [
-    { t:"~10:00", n:"Breakfast", d:"Repeat any weekday breakfast (omelette, egg wrap or cottage cheese bowl)" },
-    { t:"13:30", n:"Lunch", d:"Full plate: 2 palms protein + 2 fists veg + 1 cupped hand carbs + 1 thumb fat" },
-    { t:"~20:00", n:"Dinner (out or home)", d:"Protein + veg first, then ONE extra – dessert OR alcohol OR bread/fries. 🍨 Ice cream #2 can go here." },
-  ]},
-  sun: { tag: "Rest + measure", weekend:true, meals: [
-    { t:"~10:00", n:"Breakfast", d:"Repeat any weekday breakfast" },
-    { t:"13:30", n:"Lunch", d:"Full plate: 2 palms protein + 2 fists veg + 1 cupped hand carbs + 1 thumb fat" },
-    { t:"~20:00", n:"Dinner", d:"Protein + veg (no carbs on rest days). Kitchen closes after dinner." },
-  ]},
+/* ===================== RAZVAN ===================== */
+const RAZVAN = {
+  name: "Razvan", goal: "<span>→ 90 kg</span>",
+  dailyRules: "<b>Daily rules:</b> eating window ~10:00 → 19:30/20:00 · 15 g pistachios before the evening · 2.5–3 L water · late snack = fruit, herbal tea or Cola Zero.",
+  menu: {
+    mon: { tag: "Strength A", meals: [
+      { t:"10:00", n:"Omelette", d:"3 eggs + 100 g cottage cheese stirred in + 100 g peppers, 50 g mushrooms, 100 g tomatoes + 1 tsp olive oil + 1 small wholemeal tortilla (40 g)", k:510, p:40, c:34, f:24 },
+      { t:"12:00", n:"Strength session A", train:true },
+      { t:"13:30", n:"Sardines & rice", d:"2 cans sardines in olive oil, drained (180 g) + 200 g rice + 200 g salad (tomato, cucumber, onion, pepper) + lemon", k:680, p:51, c:64, f:22 },
+      { t:"16:30", n:"Snack", d:"1 apple + 120 g cottage cheese (rest of pack) + 15 g pistachios", k:255, p:20, c:27, f:9 },
+      { t:"19:00", n:"Pork tenderloin", d:"200 g pork tenderloin + 300 g roasted broccoli, courgette, peppers + 1 tbsp olive oil", k:440, p:48, c:14, f:18 },
+    ]},
+    tue: { tag: "BJJ 19:00", meals: [
+      { t:"10:00", n:"Egg wrap", d:"3 eggs + 60 g smoked salmon + 1 wholemeal tortilla + 100 g tomato + 1 tsp oil + 15 g pistachios", k:555, p:37, c:29, f:32 },
+      { t:"13:30", n:"Beef steak & rice", d:"200 g lean beef steak + 200 g rice + 200 g peppers, mushrooms, onion + 1 tsp oil", k:635, p:51, c:65, f:17 },
+      { t:"17:00", n:"Pre-training", d:"1 can tuna in water (110 g drained) on 2 rice cakes + 1 banana", k:300, p:31, c:42, f:2 },
+      { t:"19:00", n:"Jiu jitsu", train:true },
+      { t:"21:00", n:"Salmon & potatoes", d:"180 g salmon + 250 g boiled potatoes + 150 g green beans", k:640, p:44, c:60, f:25 },
+    ]},
+    wed: { tag: "Optional noon BJJ / stairs", meals: [
+      { t:"10:00", n:"Omelette", d:"3 eggs + 30 g parmesan + 100 g mushrooms + 50 g onion + 1 tsp oil + 15 g pistachios", k:510, p:36, c:14, f:34 },
+      { t:"13:30", n:"Chicken souvlaki", d:"200 g chicken breast + 1 tsp oil + 1 large pitta (90 g) + 200 g tomato, cucumber, onion salad + 30 g olives", k:590, p:57, c:59, f:13 },
+      { t:"15:00", n:"🍨 Ice cream #1", d:"100 g pistachio ice cream, in a bowl", k:220, p:4, c:25, f:12 },
+      { t:"17:00", n:"Fruit", d:"1 apple", k:80, p:0, c:20, f:0 },
+      { t:"19:00", n:"Chicken breast", d:"200 g chicken breast + 150 g grilled mushrooms + 150 g pepper & rocket salad + 1 tbsp oil. Cook extra for Thursday breakfasts (see shopping list). If you trained at noon: + 150 g rice/potatoes", k:400, p:53, c:11, f:15 },
+    ]},
+    thu: { tag: "BJJ 19:00", meals: [
+      { t:"10:00", n:"Egg wrap", d:"2 eggs + 80 g cooked chicken (from Wed) + 1 wholemeal tortilla + 100 g tomato + 1 tsp oil + 15 g pistachios", k:540, p:45, c:29, f:28 },
+      { t:"13:30", n:"Pork loin & bulgur", d:"200 g pork loin + 200 g bulgur or rice + 250 g roasted vegetables + 1 tsp oil", k:570, p:53, c:49, f:18 },
+      { t:"17:00", n:"Pre-training", d:"250 g kefir + 1 banana", k:215, p:10, c:37, f:4 },
+      { t:"19:00", n:"Jiu jitsu", train:true },
+      { t:"21:00", n:"Chicken traybake", d:"200 g skinless chicken thighs + 250 g potatoes + 250 g carrots, onion, peppers + 1 tbsp oil", k:655, p:47, c:68, f:22 },
+    ]},
+    fri: { tag: "Strength B", meals: [
+      { t:"10:00", n:"Cottage cheese bowl", d:"220 g cottage cheese + 150 g mixed berries + 15 g pistachios + 1 banana", k:430, p:37, c:53, f:11 },
+      { t:"12:00", n:"Strength session B", train:true },
+      { t:"13:30", n:"Sea bass & potatoes", d:"200 g sea bass + 250 g potatoes + 200 g salad + 1 tbsp oil", k:565, p:44, c:58, f:17 },
+      { t:"16:30", n:"Snack", d:"1 can tuna in water (110 g drained) on 2 rice cakes", k:195, p:30, c:15, f:2 },
+      { t:"19:00", n:"Lettuce-wrap burgers", d:"2 lean beef patties (200 g, 5% fat) in lettuce wraps + 20 g mature cheddar + 80 g avocado + tomato & onion + 150 g vinegar coleslaw", k:580, p:52, c:27, f:32 },
+    ]},
+    sat: { tag: "Walk / bike / stairs", weekend:true, meals: [
+      { t:"~10:00", n:"Breakfast", d:"Repeat any weekday breakfast (omelette, egg wrap or cottage cheese bowl)" },
+      { t:"13:30", n:"Lunch", d:"Full plate: 2 palms protein + 2 fists veg + 1 cupped hand carbs + 1 thumb fat" },
+      { t:"~20:00", n:"Dinner (out or home)", d:"Protein + veg first, then ONE extra – dessert OR alcohol OR bread/fries. 🍨 Ice cream #2 can go here." },
+    ]},
+    sun: { tag: "Rest + measure", weekend:true, meals: [
+      { t:"~10:00", n:"Breakfast", d:"Repeat any weekday breakfast" },
+      { t:"13:30", n:"Lunch", d:"Full plate: 2 palms protein + 2 fists veg + 1 cupped hand carbs + 1 thumb fat" },
+      { t:"~20:00", n:"Dinner", d:"Protein + veg (no carbs on rest days). Kitchen closes after dinner." },
+    ]},
+  },
+  sessions: {
+    A: { name: "Session A – Monday (30–40 min)", ex: [
+      ["Bulgarian split squat (back foot on stair/sofa)", "3 × 8–12 / leg", "Bodyweight → hold dumbbells"],
+      ["Push-ups", "3 × (max − 2)", "Hands elevated → floor → feet elevated"],
+      ["Band row (band anchored in door)", "3 × 12–15", "Thicker band, slower lowering"],
+      ["Single-leg Romanian deadlift", "3 × 8–10 / leg", "Bodyweight → dumbbell"],
+      ["Plank + side plank", "3 × 30–45 s", "+5 s per week"],
+    ]},
+    B: { name: "Session B – Friday (30–40 min)", ex: [
+      ["Stair step-ups (2 steps at a time)", "3 × 10 / leg", "Add dumbbells"],
+      ["Pike push-up or dumbbell shoulder press", "3 × 8–12", "Feet higher / heavier dumbbells"],
+      ["One-arm dumbbell row", "3 × 10–12 / arm", "Heavier dumbbell"],
+      ["Glute bridge → single-leg glute bridge", "3 × 12–15", "Single leg, 2 s pause at top"],
+      ["Dead bug", "3 × 10 / side", "Slower, arms/legs straighter"],
+      ["Farmer's carry (heavy dumbbells)", "3 × 30–40 m", "Heavier / longer – gi grip 💪"],
+    ]},
+    STAIRS: { name: "Stairs conditioning (~10–12 min)", ex: [
+      ["Warm-up: easy walk up & down", "2 rounds", ""],
+      ["Climb briskly, walk down", "8–10 rounds", "Add a round every 1–2 weeks"],
+    ]},
+  },
+  trainingByDay: {
+    mon: { title: "Strength A", sub: "Or BJJ 12:00 – if you do BJJ, move strength A to the next free day.", plan: "A" },
+    tue: { title: "Jiu jitsu 19:00", sub: "Eat the 17:00 snack. Post-training dinner is pre-plated." },
+    wed: { title: "Optional BJJ 12:00 or stairs", sub: "If no BJJ, do the stairs session.", plan: "STAIRS" },
+    thu: { title: "Jiu jitsu 19:00", sub: "Eat the 17:00 snack. Post-training dinner is pre-plated." },
+    fri: { title: "Strength B", sub: "Or BJJ 12:00 – if you do BJJ, move strength B to the next free day.", plan: "B" },
+    sat: { title: "Active day", sub: "Walk, bike with your kid, or stairs session.", plan: "STAIRS" },
+    sun: { title: "Rest", sub: "Measure your waist at the navel. Note this week's average weight." },
+  },
+  mealPlanHtml: `
+    <div class="card"><h2>Targets</h2><ul>
+      <li><b>~1,800–1,900 kcal</b> on rest/strength days, <b>~2,000–2,150</b> on BJJ days</li>
+      <li><b>Protein ~150–165 g/day</b> · eating window <b>~10:00 → 19:30/20:00</b>, then kitchen closes</li>
+    </ul></div>
+    <div class="card"><h2>Portion guide (per main meal)</h2><div class="tablewrap"><table>
+      <tr><th>Component</th><th>Portion</th><th>Examples</th></tr>
+      <tr><td>Protein</td><td><b>2 palms</b></td><td>Chicken, beef, pork, fish (sardines, tuna, salmon, sea bass), 3–4 eggs, cottage cheese, kefir</td></tr>
+      <tr><td>Vegetables</td><td><b>2 fists</b></td><td>Salads, peppers, broccoli, courgette, cabbage, mushrooms, tomatoes, green beans</td></tr>
+      <tr><td>Carbs</td><td><b>0–1 cupped hand</b></td><td>Rice, potatoes, bulgur, wholemeal tortilla, pitta, rice cakes, fruit</td></tr>
+      <tr><td>Fats</td><td><b>1 thumb</b></td><td>Olive oil, avocado, parmesan, mature cheddar, unsalted pistachios</td></tr>
+    </table></div>
+    <p class="small"><b>Carb rule:</b> 1 cupped hand at meals before/after training. Rest days: carbs at lunch only – dinner = protein + veg.</p></div>
+    %MENU%
+    <div class="card"><h2>Rules that make it work</h2><ul>
+      <li>🍨 <b>Ice cream:</b> 2× per week, ~100 g, in a bowl or single cup – never from the tub, not late at night.</li>
+      <li>🥜 <b>Pistachios:</b> 15 g unsalted (~25 nuts) per day, before the evening.</li>
+      <li>🍽️ <b>Eating out:</b> protein + veg first, then ONE extra – dessert OR alcohol OR bread/fries.</li>
+      <li>🥋 <b>Post-training hunger:</b> 17:00 snack + a pre-plated dinner waiting = no kitchen raids.</li>
+      <li>🥛 <b>Lactose-friendly:</b> cottage cheese, kefir, aged hard cheese. No processed meats.</li>
+      <li>🎄 <b>Christmas:</b> planned 2-week maintenance break – maintenance, not "anything goes".</li>
+    </ul></div>
+    <div class="card"><h2>Phases & keeping it off</h2><div class="tablewrap"><table>
+      <tr><th>Phase</th><th>When</th><th>Focus</th></tr>
+      <tr><td>1. Competition prep</td><td>Now → 1 Nov</td><td>~0.5 kg/week, carbs around training, no crash dieting</td></tr>
+      <tr><td>2. Main fat loss</td><td>Nov → ~Apr 2027</td><td>~0.5–0.75 kg/week, protein + veg + low carb</td></tr>
+      <tr><td>3. Keep it off</td><td>From 90 kg</td><td>Add carbs back over 2–4 weeks. <b>Ceiling rule:</b> weekly average &gt; 93 kg → 3 weeks of phase 2 rules</td></tr>
+    </table></div></div>`,
+  trainingHtml: `
+    <div class="card"><h2>How to train</h2><ul>
+      <li>Stop each set ~2 reps before failure, rest 60–90 s.</li>
+      <li><b>Weeks 1–2:</b> 2 sets per exercise, then 3 sets.</li>
+      <li>Goal: keep (or build) muscle while losing fat, and perform well in BJJ.</li>
+    </ul></div>
+    %SESSIONS%
+    <div class="card"><h2>Conditioning & steps</h2><ul>
+      <li><b>Stairs (Wed or weekend):</b> 8–10 rounds – climb briskly, walk down (~10–12 min).</li>
+      <li><b>Steps:</b> 6,000 → <b>8,000</b> in October → <b>10,000</b> from November. 15-min walk after lunch on WFH days; biking to school counts.</li>
+      <li><b>Optional:</b> doorway pull-up bar – best bodyweight pulling and grip work for BJJ.</li>
+    </ul></div>
+    <div class="card"><h2>🥋 Competition – GB Compnet, 1 November</h2><ul>
+      <li><b>Last strength session: Mon 26 Oct</b>, light (2 sets). Nothing heavy after that.</li>
+      <li>Competition week: lower BJJ intensity, sleep 7.5–8 h, eat normally with carbs. Confirm the division weight limit.</li>
+    </ul></div>
+    <div class="card"><h2>Tracking</h2><div class="tablewrap"><table>
+      <tr><th>What</th><th>How often</th><th>Note</th></tr>
+      <tr><td>Weight</td><td>3–7× / week, morning</td><td>Only the weekly average matters</td></tr>
+      <tr><td>Waist (at navel)</td><td>Every Sunday</td><td>Best fat-loss signal</td></tr>
+      <tr><td>Body-composition scale + photos</td><td>Monthly</td><td>Same conditions each time</td></tr>
+      <tr><td>Blood tests</td><td>Now + after 3–6 months</td><td>Glucose/HbA1c, lipids + ApoB/Lp(a), liver, kidney, TSH, vit D, B12, ferritin, hs-CRP</td></tr>
+    </table></div></div>`,
 };
 
-const STRENGTH = {
-  A: { name: "Session A – Monday (30–40 min)", ex: [
-    ["Bulgarian split squat (back foot on stair/sofa)", "3 × 8–12 / leg", "Bodyweight → hold dumbbells"],
-    ["Push-ups", "3 × (max − 2)", "Hands elevated → floor → feet elevated"],
-    ["Band row (band anchored in door)", "3 × 12–15", "Thicker band, slower lowering"],
-    ["Single-leg Romanian deadlift", "3 × 8–10 / leg", "Bodyweight → dumbbell"],
-    ["Plank + side plank", "3 × 30–45 s", "+5 s per week"],
-  ]},
-  B: { name: "Session B – Friday (30–40 min)", ex: [
-    ["Stair step-ups (2 steps at a time)", "3 × 10 / leg", "Add dumbbells"],
-    ["Pike push-up or dumbbell shoulder press", "3 × 8–12", "Feet higher / heavier dumbbells"],
-    ["One-arm dumbbell row", "3 × 10–12 / arm", "Heavier dumbbell"],
-    ["Glute bridge → single-leg glute bridge", "3 × 12–15", "Single leg, 2 s pause at top"],
-    ["Dead bug", "3 × 10 / side", "Slower, arms/legs straighter"],
-    ["Farmer's carry (heavy dumbbells)", "3 × 30–40 m", "Heavier / longer – gi grip 💪"],
-  ]},
-  STAIRS: { name: "Stairs conditioning (~10–12 min)", ex: [
-    ["Warm-up: easy walk up & down", "2 rounds", ""],
-    ["Climb briskly, walk down", "8–10 rounds", "Add a round every 1–2 weeks"],
-  ]},
+/* ===================== PAULA ===================== */
+const P_AM = { t:"07:00", n:"💧 Morning routine", d:"Glass of water on waking. Coffee 30–60 min later; dairy from ~11:00.", pill:true };
+const P_COFFEE = { t:"07:45", n:"☕ Light coffee with soy milk", d:"Same time every day", k:40, p:3, c:2, f:2 };
+const PAULA = {
+  name: "Paula", goal: "<span>→ 55–56 kg</span>",
+  dailyRules: "<b>Daily rules:</b> water on waking → coffee 30–60 min later → dairy from ~11:00 · 15 g pistachios before the evening · 2–2.5 L water, tea, coffee · late snack = herbal tea or fruit.",
+  menu: {
+    mon: { tag: "Pilates 12:00 · Tai chi 19:00", meals: [
+      P_AM, P_COFFEE,
+      { t:"09:00", n:"Omelette", d:"2 eggs + 2 egg whites + 100 g peppers, 50 g mushrooms, 100 g tomato + 1 tsp oil + ½ wholemeal tortilla", k:345, p:25, c:21, f:17 },
+      { t:"12:00", n:"Reformer Pilates", train:true },
+      { t:"13:30", n:"Chicken & rice", d:"130 g chicken breast + 120 g rice + 200 g salad (tomato, cucumber, onion, pepper) + 1 tsp oil + lemon", k:395, p:35, c:42, f:8 },
+      { t:"16:30", n:"Pre-class snack", d:"1 apple + 120 g cottage cheese + 15 g pistachios", k:255, p:20, c:27, f:9 },
+      { t:"19:00", n:"Tai chi", train:true },
+      { t:"20:15", n:"Pork tenderloin", d:"150 g pork tenderloin + 300 g roasted broccoli, courgette, peppers + 1 tbsp oil. (If eating before class: same meal at ~18:00, herbal tea after.)", k:390, p:36, c:15, f:20 },
+    ]},
+    tue: { tag: "Yoga ~10:00 (2× / week)", meals: [
+      P_AM, P_COFFEE,
+      { t:"09:00", n:"Egg wrap", d:"2 eggs + 50 g smoked salmon + 1 wholemeal tortilla + 100 g tomato + 1 tsp oil", k:385, p:27, c:20, f:20 },
+      { t:"13:30", n:"Chicken & rice", d:"130 g chicken breast + 120 g rice + 200 g peppers, mushrooms, onion + 1 tsp oil", k:425, p:41, c:44, f:8 },
+      { t:"16:30", n:"Snack", d:"200 g kefir + 15 g pistachios", k:175, p:10, c:12, f:10 },
+      { t:"19:00", n:"Salmon & potatoes (family dinner)", d:"130 g salmon + 150 g potatoes + 150 g green beans", k:425, p:32, c:34, f:17 },
+    ]},
+    wed: { tag: "Yoga ~10:00 (2× / week)", meals: [
+      P_AM, P_COFFEE,
+      { t:"09:00", n:"Omelette", d:"2 eggs + 2 egg whites + 100 g mushrooms + 50 g onion + herbs + 1 tsp oil + ½ tortilla (no cheese – dairy after 11:00)", k:325, p:25, c:17, f:16 },
+      { t:"13:30", n:"Chicken souvlaki", d:"130 g chicken breast + 1 tsp oil + ½ large pitta + 200 g salad + 20 g olives", k:390, p:36, c:33, f:11 },
+      { t:"15:00", n:"🍨 Treat together", d:"70 g pistachio ice cream", k:155, p:3, c:18, f:8 },
+      { t:"16:30", n:"Snack", d:"100 g cottage cheese + 1 apple + 15 g pistachios", k:240, p:17, c:27, f:9 },
+      { t:"19:00", n:"Chicken breast", d:"150 g chicken breast + 150 g mushrooms + 150 g pepper & rocket salad + 2 tsp oil. Cook 60 g extra for Thursday breakfast.", k:330, p:39, c:10, f:13 },
+    ]},
+    thu: { tag: "Yoga ~10:00 (2× / week)", meals: [
+      P_AM, P_COFFEE,
+      { t:"09:00", n:"Egg wrap", d:"2 eggs + 60 g cooked chicken (from Wed) + 1 wholemeal tortilla + 100 g tomato", k:380, p:37, c:24, f:15 },
+      { t:"13:30", n:"Pork loin & bulgur", d:"130 g pork loin + 120 g bulgur + 250 g roasted vegetables + 1 tsp oil", k:400, p:36, c:35, f:14 },
+      { t:"16:30", n:"Snack", d:"200 g kefir + 100 g berries + 15 g pistachios", k:225, p:11, c:23, f:10 },
+      { t:"19:00", n:"Chicken traybake (family dinner)", d:"150 g chicken thighs + 150 g potatoes + 200 g carrots, onion, peppers + 2 tsp oil", k:460, p:35, c:41, f:17 },
+    ]},
+    fri: { tag: "Pilates 14:00 · Tai chi 19:00", meals: [
+      P_AM, P_COFFEE,
+      { t:"09:00", n:"Salmon & avocado wrap", d:"2 eggs + 50 g smoked salmon + 50 g avocado + ½ tortilla + tomato", k:360, p:26, c:18, f:21 },
+      { t:"12:30", n:"Salmon & potatoes", d:"120 g salmon + 150 g potatoes + 200 g salad + lemon (earlier lunch because of Pilates)", k:410, p:29, c:35, f:16 },
+      { t:"14:00", n:"Reformer Pilates", train:true },
+      { t:"16:30", n:"Pre-class snack", d:"150 g cottage cheese + 100 g berries + 15 g pistachios", k:250, p:25, c:18, f:10 },
+      { t:"19:00", n:"Tai chi", train:true },
+      { t:"20:15", n:"Lettuce-wrap burger", d:"1 lean beef patty (130 g) in lettuce + 15 g cheddar + 50 g avocado + tomato & onion + 100 g vinegar coleslaw. (If eating before class: ~18:00, herbal tea after.)", k:375, p:34, c:17, f:20 },
+    ]},
+    sat: { tag: "Walk / bike", weekend:true, meals: [
+      P_AM, P_COFFEE,
+      { t:"~09:00", n:"Breakfast", d:"Any weekday breakfast (egg-based, no dairy before 11:00)" },
+      { t:"13:30", n:"Lunch", d:"Plate: 1–1.5 palms protein + 2 fists veg + ½–1 cupped hand carbs + 1 thumb fat" },
+      { t:"~20:00", n:"Dinner (out or home)", d:"Protein + veg first, then ONE small extra (dessert or bread/fries). Weekend treat can go here." },
+    ]},
+    sun: { tag: "Rest + measure", weekend:true, meals: [
+      P_AM, P_COFFEE,
+      { t:"~09:00", n:"Breakfast", d:"Any weekday breakfast" },
+      { t:"13:30", n:"Lunch", d:"Plate: 1–1.5 palms protein + 2 fists veg + ½–1 cupped hand carbs + 1 thumb fat" },
+      { t:"~20:00", n:"Dinner", d:"Protein + veg. Herbal tea after dinner." },
+    ]},
+  },
+  sessions: {
+    PILATES: { name: "Reformer Pilates – focus on strength", ex: [
+      ["Ask the instructor to add spring load gradually", "Every 2–3 weeks", "Heavier load = muscle + bone"],
+      ["Last reps of each set should feel hard", "Leg press, squats, rows, arms", ""],
+      ["Prioritise legs, glutes and back work", "Every session", "Biggest muscles protect bone best"],
+    ]},
+    WALK: { name: "Walk", ex: [
+      ["15-min walk after lunch", "Daily", "Easiest way to add ~2,000 steps"],
+      ["Carry the shopping bags", "When possible", "Loaded carrying helps bone density"],
+    ]},
+  },
+  trainingByDay: {
+    mon: { title: "Reformer Pilates 12:00 + Tai chi 19:00", sub: "Pre-class snack at 16:30. Dinner after class (~20:15) or before (~18:00).", plan: "PILATES" },
+    tue: { title: "Yoga ~10:00 (if this is a yoga day)", sub: "2 yoga sessions per week on Tue/Wed/Thu. Walk after lunch.", plan: "WALK" },
+    wed: { title: "Yoga ~10:00 (if this is a yoga day)", sub: "2 yoga sessions per week on Tue/Wed/Thu. Walk after lunch.", plan: "WALK" },
+    thu: { title: "Yoga ~10:00 (if this is a yoga day)", sub: "2 yoga sessions per week on Tue/Wed/Thu. Walk after lunch.", plan: "WALK" },
+    fri: { title: "Reformer Pilates 14:00 + Tai chi 19:00", sub: "Lunch at 12:30. Pre-class snack at 16:30. Dinner after class (~20:15) or before (~18:00).", plan: "PILATES" },
+    sat: { title: "Active day", sub: "Family walk or bike ride.", plan: "WALK" },
+    sun: { title: "Rest", sub: "Measure waist at the navel. Note this week's average weight." },
+  },
+  mealPlanHtml: `
+    <div class="note-box">☀️ <b>Morning routine:</b> water on waking (~07:00) → light coffee with soy milk 30–60 min later → egg-based breakfast ~09:00 → <b>dairy (cottage cheese, kefir, cheese) from ~11:00</b>. Keep the routine the same every day.</div>
+    <div class="card"><h2>Targets</h2><ul>
+      <li><b>~1,450–1,550 kcal/day</b> – gentle deficit, never below ~1,400</li>
+      <li><b>Protein ~110–120 g/day</b> · pace ~0.25–0.3 kg/week → 55–56 kg in ~3–4 months</li>
+      <li>Same base meals as Razvan at ~60–65% of his portions</li>
+    </ul></div>
+    <div class="card"><h2>Portion guide (per main meal)</h2><div class="tablewrap"><table>
+      <tr><th>Component</th><th>Portion</th><th>Examples</th></tr>
+      <tr><td>Protein</td><td><b>1–1.5 palms</b></td><td>Chicken, pork, salmon, burger, 2 eggs + whites, cottage cheese, kefir</td></tr>
+      <tr><td>Vegetables</td><td><b>2 fists</b></td><td>Salads, peppers, broccoli, courgette, mushrooms, tomatoes, green beans, carrots</td></tr>
+      <tr><td>Carbs</td><td><b>½–1 cupped hand</b></td><td>Rice, potatoes, bulgur, tortilla, pitta, fruit</td></tr>
+      <tr><td>Fats</td><td><b>1 thumb</b></td><td>Olive oil, avocado, cheddar, unsalted pistachios</td></tr>
+    </table></div>
+    <p class="small"><b>No:</b> lamb, goat, seafood. Fish = salmon only. Beef = burgers only.</p></div>
+    %MENU%
+    <div class="card"><h2>Sweets & treats</h2><ul>
+      <li>🍫 <b>Normal weeks:</b> Wednesday ice cream + 1–2 more treats of ~150 kcal (20 g dark chocolate, a small biscuit with coffee).</li>
+      <li>🌙 <b>Higher-appetite weeks:</b> one small treat every day (~100–150 kcal) – planned, not cheating. Add fruit and protein to take the edge off.</li>
+      <li>🥜 <b>Pistachios:</b> 15 g unsalted per day, before the evening.</li>
+      <li>🍽️ <b>Eating out:</b> protein + veg first, then ONE small extra.</li>
+      <li>🍵 <b>Drinks:</b> water, tea, coffee with soy milk. Late evening = herbal tea.</li>
+    </ul></div>
+    <div class="card"><h2>Phases</h2><div class="tablewrap"><table>
+      <tr><th>Phase</th><th>When</th><th>Focus</th></tr>
+      <tr><td>1. Gentle fat loss</td><td>Now → ~Jan 2027</td><td>~0.25–0.3 kg/week to 55–56 kg, keep muscle (≈18–20% body fat)</td></tr>
+      <tr><td>2. Review</td><td>At 55–56 kg</td><td>Judge by waist, photos and energy – then decide whether to go lower or maintain</td></tr>
+      <tr><td>3. Keep it off</td><td>After review</td><td>Add ~200 kcal back (bigger carb portions). <b>Ceiling rule:</b> weekly average &gt; 58 kg → 3 weeks of plan rules</td></tr>
+    </table></div></div>`,
+  trainingHtml: `
+    <div class="card"><h2>Why this mix works</h2><ul>
+      <li><b>Reformer Pilates</b> = strength training (spring resistance). Most important for muscle and bone.</li>
+      <li><b>Yoga & tai chi</b> = mobility, balance and stress relief.</li>
+      <li>No extra home strength sessions needed – just progress the Pilates load.</li>
+    </ul></div>
+    %SESSIONS%
+    <div class="card"><h2>Steps</h2><ul>
+      <li>4,500 → <b>7,000</b> in October → <b>8,000</b> from November.</li>
+      <li>Working from home: a 15-min walk after lunch is the easiest win.</li>
+    </ul></div>
+    <div class="card"><h2>Tracking & health</h2><div class="tablewrap"><table>
+      <tr><th>What</th><th>How often</th><th>Note</th></tr>
+      <tr><td>Weight</td><td>3–7× / week, morning</td><td>Only the weekly average matters</td></tr>
+      <tr><td>Waist (at navel)</td><td>Every Sunday</td><td>Best fat-loss signal</td></tr>
+      <tr><td>Body-composition scale + photos</td><td>Monthly</td><td>Same conditions each time</td></tr>
+      <tr><td>Blood tests</td><td>Soon + after 3 months</td><td>Annual check-up panel (as agreed with GP)</td></tr>
+    </table></div></div>`,
 };
 
-const TRAINING_BY_DAY = {
-  mon: { title: "Strength A", sub: "Or BJJ 12:00 – if you do BJJ, move strength A to the next free day.", plan: "A" },
-  tue: { title: "Jiu jitsu 19:00", sub: "Eat the 17:00 snack. Post-training dinner is pre-plated." },
-  wed: { title: "Optional BJJ 12:00 or stairs", sub: "If no BJJ, do the stairs session.", plan: "STAIRS" },
-  thu: { title: "Jiu jitsu 19:00", sub: "Eat the 17:00 snack. Post-training dinner is pre-plated." },
-  fri: { title: "Strength B", sub: "Or BJJ 12:00 – if you do BJJ, move strength B to the next free day.", plan: "B" },
-  sat: { title: "Active day", sub: "Walk, bike with your kid, or stairs session.", plan: "STAIRS" },
-  sun: { title: "Rest", sub: "Measure your waist at the navel. Note this week's average weight." },
-};
+const PROFILES = { razvan: RAZVAN, paula: PAULA };
 
+/* ===================== SHARED SHOPPING LIST ===================== */
 const DEFAULT_SHOPPING = [
-  ["Meat","Chicken breast","~500 g","Wed souvlaki (200 g) + Wed dinner (280 g)"],
-  ["Meat","Chicken thighs, skinless","200 g","Thu traybake"],
-  ["Meat","Pork tenderloin","200 g","Mon dinner"],
-  ["Meat","Pork loin","200 g","Thu lunch"],
-  ["Meat","Lean beef steak (sirloin/rump)","200 g","Tue lunch"],
-  ["Meat","Lean beef mince 5% (or 2 lean patties)","200 g","Fri burgers"],
-  ["Fish","Salmon fillet","180 g","Tue dinner"],
-  ["Fish","Sea bass fillets","200 g","Fri lunch"],
-  ["Fish","Smoked salmon","1 small pack (~100 g)","Tue breakfast (60 g)"],
-  ["Fish","Sardines in olive oil","2 cans","Mon lunch"],
-  ["Fish","Tuna in water","2 cans","Tue 17:00, Fri 16:30"],
-  ["Eggs & dairy","Eggs","12","Mon–Thu breakfasts (11)"],
-  ["Eggs & dairy","Cottage cheese (220 g pack)","2 packs","Mon breakfast + snack, Fri breakfast"],
-  ["Eggs & dairy","Kefir (500 g bottle)","1 bottle","Thu 17:00 (250 g)"],
-  ["Vegetables","Peppers","4 (~600 g)","Omelettes, salads, roasts"],
-  ["Vegetables","Tomatoes","~500 g","Breakfasts, salads, burgers"],
-  ["Vegetables","Mushrooms","~400 g","Mon, Tue, Wed"],
-  ["Vegetables","Onions (red + white)","4","Salads, omelette, traybake"],
-  ["Vegetables","Cucumber","1","Salads"],
-  ["Vegetables","Broccoli","1 head (~350 g)","Mon dinner, Thu roast veg"],
-  ["Vegetables","Courgettes","2","Mon dinner, Thu roast veg"],
-  ["Vegetables","Green beans","~200 g","Tue dinner"],
-  ["Vegetables","Carrots","3","Thu traybake, coleslaw"],
-  ["Vegetables","White cabbage or coleslaw mix","~150 g","Fri coleslaw"],
-  ["Vegetables","Lettuce + rocket","1 + 1 bag","Burger wraps, salads"],
-  ["Vegetables","Potatoes","1 kg","Tue, Thu, Fri (+ Wed if BJJ)"],
-  ["Vegetables","Avocado","1","Fri burger"],
-  ["Fruit","Bananas","3","Tue, Thu, Fri"],
-  ["Fruit","Apples","2","Mon, Wed"],
-  ["Fruit","Berries (frozen is fine)","150 g","Fri breakfast"],
-  ["Fruit","Lemons","2","Sardines, chicken, fish"],
-  ["Bread","Small wholemeal tortillas","1 pack","Mon, Tue, Thu breakfasts"],
-  ["Bread","Large pitta","1","Wed souvlaki"],
-  ["Treat","Pistachio ice cream cups (~100 g)","2","Wed + weekend"],
-  ["Pantry","Unsalted pistachios in shell","~200 g","15 g shelled / day"],
-  ["Pantry","Rice / bulgur (dry)","~200 g","~600 g cooked"],
-  ["Pantry","Rice cakes","4","Tue, Fri snacks"],
-  ["Pantry","Olive oil","~100 ml",""],
-  ["Pantry","Parmesan + mature cheddar","30 g + 20 g","Wed omelette, Fri burger"],
-  ["Pantry","Olives","30 g","Wed souvlaki"],
+  ["Meat","Chicken breast","~1.1 kg","R: Wed souvlaki + dinner (~480 g) · P: Mon, Tue, Wed (~600 g)"],
+  ["Meat","Chicken thighs, skinless","350 g","Thu traybake (R 200 + P 150)"],
+  ["Meat","Pork tenderloin","350 g","Mon dinner (R 200 + P 150)"],
+  ["Meat","Pork loin","330 g","Thu lunch (R 200 + P 130)"],
+  ["Meat","Lean beef steak (sirloin/rump)","200 g","R: Tue lunch"],
+  ["Meat","Lean beef mince 5% (or 3 lean patties)","330 g","Fri burgers (R 200 + P 130)"],
+  ["Fish","Salmon fillet","430 g","Tue dinner (R 180 + P 130) · P: Fri lunch (120)"],
+  ["Fish","Sea bass fillets","200 g","R: Fri lunch"],
+  ["Fish","Smoked salmon","2 small packs (~200 g)","R: Tue · P: Tue, Fri breakfasts"],
+  ["Fish","Sardines in olive oil","2 cans","R: Mon lunch"],
+  ["Fish","Tuna in water","2 cans","R: Tue 17:00, Fri 16:30"],
+  ["Eggs & dairy","Eggs","26 (2 dozen + 2)","Breakfasts (R 11 + P 14 incl. whites)"],
+  ["Eggs & dairy","Cottage cheese (220 g pack)","4 packs","R: Mon, Fri · P: Mon, Wed, Fri snacks"],
+  ["Eggs & dairy","Kefir (500 g bottle)","2 bottles","R: Thu · P: Tue, Thu snacks"],
+  ["Eggs & dairy","Soy milk","1 L","P: daily coffee"],
+  ["Vegetables","Peppers","7 (~1 kg)","Omelettes, salads, roasts, traybake"],
+  ["Vegetables","Tomatoes","~900 g","Breakfasts, salads, burgers"],
+  ["Vegetables","Mushrooms","~650 g","Mon, Tue, Wed"],
+  ["Vegetables","Onions (red + white)","6","Salads, omelettes, traybake, burgers"],
+  ["Vegetables","Cucumber","2","Salads"],
+  ["Vegetables","Broccoli","2 heads","Mon dinner, Thu roast veg"],
+  ["Vegetables","Courgettes","3","Mon dinner, Thu roast veg"],
+  ["Vegetables","Green beans","~350 g","Tue dinner"],
+  ["Vegetables","Carrots","5","Thu traybake, coleslaw"],
+  ["Vegetables","White cabbage or coleslaw mix","~250 g","Fri coleslaw"],
+  ["Vegetables","Lettuce + rocket","2 + 2 bags","Burger wraps, salads"],
+  ["Vegetables","Potatoes","2 kg","Tue, Thu, Fri (+ Wed if BJJ)"],
+  ["Vegetables","Avocados","3","Fri breakfast (P) + burgers"],
+  ["Fruit","Bananas","3","R: Tue, Thu, Fri"],
+  ["Fruit","Apples","4","Mon, Wed (both)"],
+  ["Fruit","Berries (frozen is fine)","350 g","R: Fri · P: Thu, Fri"],
+  ["Fruit","Lemons","3","Chicken, fish, salads"],
+  ["Bread","Small wholemeal tortillas","1 pack of 8","Breakfasts (R 3 + P 3.5)"],
+  ["Bread","Large pitta","2","Wed souvlaki (R 1 + P ½)"],
+  ["Treat","Pistachio ice cream cups (~100 g)","4","Wed + weekend (P eats ~¾ cup)"],
+  ["Treat","Dark chocolate 70%+","1 bar (100 g)","P: weekly treats"],
+  ["Pantry","Unsalted pistachios in shell","~350 g","15 g shelled / day each"],
+  ["Pantry","Rice / bulgur (dry)","~350 g","~1 kg cooked"],
+  ["Pantry","Rice cakes","4","R: Tue, Fri snacks"],
+  ["Pantry","Olive oil","~150 ml",""],
+  ["Pantry","Parmesan + mature cheddar","30 g + 35 g","R: Wed omelette · burgers"],
+  ["Pantry","Olives","50 g","Wed souvlaki"],
+  ["Pantry","Coffee, tea, herbal tea","",""],
+  ["Pantry","Cola Zero","","R only"],
   ["Pantry","Vinegar, mustard, garlic, herbs & spices","",""],
 ];
 const CATEGORIES = ["Meat","Fish","Eggs & dairy","Vegetables","Fruit","Bread","Treat","Pantry","Other"];
@@ -339,13 +537,24 @@ function dateForDay(day) {
 }
 const sum = (meals, key) => meals.reduce((a, m) => a + (m[key] || 0), 0);
 
-/* ===================== TABS ===================== */
+let who = localStorage.getItem("wl-who") || "razvan";
+const P = () => PROFILES[who];
+
+/* ===================== TABS / PROFILE ===================== */
 function showTab(name) {
   document.querySelectorAll("#tabs button").forEach(b => b.classList.toggle("active", b.dataset.tab === name));
   document.querySelectorAll("main > section").forEach(s => s.classList.toggle("hidden", s.id !== "tab-" + name));
   localStorage.setItem("wl-tab", name);
 }
+function setWho(w) {
+  who = w; localStorage.setItem("wl-who", w);
+  document.querySelectorAll("#who button").forEach(b => b.classList.toggle("active", b.dataset.who === w));
+  $("#title").innerHTML = `${P().name} ${P().goal}`;
+  document.title = `${P().name} – plan`;
+  renderToday(); renderMeals(); renderTraining();
+}
 $("#tabs").addEventListener("click", e => { if (e.target.dataset.tab) showTab(e.target.dataset.tab); });
+$("#who").addEventListener("click", e => { if (e.target.dataset.who) setWho(e.target.dataset.who); });
 $("#themeBtn").addEventListener("click", () => {
   const next = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
   document.documentElement.setAttribute("data-theme", next); localStorage.setItem("wl-theme", next);
@@ -353,18 +562,18 @@ $("#themeBtn").addEventListener("click", () => {
 
 /* ===================== TODAY ===================== */
 let selDay = todayKey();
-function exerciseList(planKey, doneMap, prefix) {
-  const p = STRENGTH[planKey];
+const doneKey = () => `wl-done-${who}-${dateForDay(selDay)}`;
+function exerciseList(planKey, doneMap) {
+  const p = P().sessions[planKey];
   return `<h3>${esc(p.name)}</h3>` + p.ex.map((e, i) => {
-    const id = `${prefix}${planKey}-${i}`;
+    const id = `x${planKey}-${i}`;
     return `<label class="ex ${doneMap[id] ? "done" : ""}"><input type="checkbox" data-done="${id}" ${doneMap[id] ? "checked" : ""}>
       <div class="body"><div><b>${esc(e[0])}</b> · ${esc(e[1])}</div>${e[2] ? `<div class="small muted">${esc(e[2])}</div>` : ""}</div></label>`;
   }).join("");
 }
 function renderToday() {
-  const dateKey = "wl-done-" + dateForDay(selDay);
-  const done = load(dateKey, {});
-  const m = MENU[selDay], tr = TRAINING_BY_DAY[selDay];
+  const done = load(doneKey(), {});
+  const m = P().menu[selDay], tr = P().trainingByDay[selDay];
   const tracked = m.meals.map((x, i) => ({ x, i })).filter(o => !o.x.train);
   const eaten = tracked.filter(o => done["m" + o.i]);
   const pct = tracked.length ? Math.round(eaten.length / tracked.length * 100) : 0;
@@ -372,13 +581,13 @@ function renderToday() {
   const pills = DAYS.map(d => `<button class="pill ${d === selDay ? "active" : ""} ${d === todayKey() ? "today" : ""}" data-day="${d}">${DAY_NAMES[d].slice(0,3)}</button>`).join("");
   const meals = m.meals.map((x, i) => {
     const id = "m" + i;
-    if (x.train) return `<div class="meal"><span style="width:20px"></span><div class="time">${esc(x.t)}</div><div class="body"><span class="tag">🥋 ${esc(x.n)}</span></div></div>`;
+    if (x.train) return `<div class="meal"><span style="width:20px"></span><div class="time">${esc(x.t)}</div><div class="body"><span class="tag">🏃 ${esc(x.n)}</span></div></div>`;
     return `<label class="meal ${done[id] ? "done" : ""}"><input type="checkbox" data-done="${id}" ${done[id] ? "checked" : ""}>
       <div class="time">${esc(x.t)}</div>
       <div class="body"><div class="name">${esc(x.n)}</div><div class="small">${esc(x.d)}</div>
       ${x.k ? `<div class="macros"><span><b>${x.k}</b> kcal</span><span>P <b>${x.p}</b> g</span><span>C <b>${x.c}</b> g</span><span>F <b>${x.f}</b> g</span></div>` : ""}</div></label>`;
   }).join("");
-  const stats = m.weekend ? `<p class="small muted">Weekend: follow the portion guide (Meal plan tab). Kitchen closes after dinner.</p>` : `
+  const stats = m.weekend ? `<p class="small muted">Weekend: follow the portion guide (Meal plan tab).</p>` : `
     <div class="totals">
       <div class="stat"><div class="v">${sum(m.meals,"k").toLocaleString()}</div><div class="l">kcal</div></div>
       <div class="stat"><div class="v">${sum(m.meals,"p")} g</div><div class="l">protein</div></div>
@@ -386,139 +595,59 @@ function renderToday() {
       <div class="stat"><div class="v">${sum(m.meals,"f")} g</div><div class="l">fat</div></div>
     </div>`;
   const progress = `<div class="progress"><div style="width:${pct}%"></div></div>
-    <div class="small muted" style="margin-top:4px">${eaten.length} of ${tracked.length} meals done</div>`;
+    <div class="small muted" style="margin-top:4px">${eaten.length} of ${tracked.length} done</div>`;
 
   $("#tab-today").innerHTML = `
     <div class="pills">${pills}</div>
     <div class="card">
-      <h2>🍽️ ${DAY_NAMES[selDay]} meals <span class="tag">${esc(m.tag)}</span></h2>
+      <h2>🍽️ ${DAY_NAMES[selDay]} <span class="tag">${esc(m.tag)}</span></h2>
       ${meals}${stats}${progress}
     </div>
     <div class="card">
-      <h2>🏋️ Training – ${esc(tr.title)}</h2>
+      <h2>🏋️ ${esc(tr.title)}</h2>
       <p class="small muted">${esc(tr.sub)}</p>
-      ${tr.plan ? exerciseList(tr.plan, done, "x") : ""}
+      ${tr.plan ? exerciseList(tr.plan, done) : ""}
     </div>
-    <div class="card small">
-      <b>Daily rules:</b> eating window ~10:00 → 19:30/20:00 · 15 g pistachios before the evening · 2.5–3 L water · late snack = fruit, herbal tea or Cola Zero.
-    </div>`;
+    <div class="card small">${P().dailyRules}</div>`;
 }
 $("#tab-today").addEventListener("click", e => {
   const d = e.target.closest("[data-day]"); if (d) { selDay = d.dataset.day; renderToday(); }
 });
 $("#tab-today").addEventListener("change", e => {
   const id = e.target.dataset.done; if (!id) return;
-  const key = "wl-done-" + dateForDay(selDay); const done = load(key, {});
+  const done = load(doneKey(), {});
   if (e.target.checked) done[id] = true; else delete done[id];
-  save(key, done); renderToday();
+  save(doneKey(), done); renderToday();
 });
 
 /* ===================== MEAL PLAN ===================== */
 function renderMeals() {
-  const rows = DAYS.filter(d => !MENU[d].weekend).map(d => {
-    const m = MENU[d];
-    const body = m.meals.filter(x => !x.train).map(x => `<tr><td>${esc(x.t)}</td><td><b>${esc(x.n)}</b> – ${esc(x.d)}</td><td class="num">${x.k}</td><td class="num">${x.p}</td><td class="num">${x.c}</td><td class="num">${x.f}</td></tr>`).join("");
+  const prof = P();
+  const rows = DAYS.filter(d => !prof.menu[d].weekend).map(d => {
+    const m = prof.menu[d];
+    const body = m.meals.filter(x => !x.train && x.k).map(x => `<tr><td>${esc(x.t)}</td><td><b>${esc(x.n)}</b> – ${esc(x.d)}</td><td class="num">${x.k}</td><td class="num">${x.p}</td><td class="num">${x.c}</td><td class="num">${x.f}</td></tr>`).join("");
     return `<tr class="dayrow"><td colspan="6">${DAY_NAMES[d]} – ${esc(m.tag)}</td></tr>${body}
       <tr class="total"><td></td><td>Day total</td><td class="num">~${sum(m.meals,"k").toLocaleString()}</td><td class="num">${sum(m.meals,"p")}</td><td class="num">${sum(m.meals,"c")}</td><td class="num">${sum(m.meals,"f")}</td></tr>`;
   }).join("");
-  $("#tab-meals").innerHTML = `
-    <div class="card">
-      <h2>Targets</h2>
-      <ul>
-        <li><b>~1,800–1,900 kcal</b> on rest/strength days, <b>~2,000–2,150</b> on BJJ days</li>
-        <li><b>Protein ~150–165 g/day</b> · eating window <b>~10:00 → 19:30/20:00</b>, then kitchen closes</li>
-      </ul>
-    </div>
-    <div class="card">
-      <h2>Portion guide (per main meal)</h2>
-      <div class="tablewrap"><table>
-        <tr><th>Component</th><th>Portion</th><th>Examples</th></tr>
-        <tr><td>Protein</td><td><b>2 palms</b></td><td>Chicken, beef, pork, fish (sardines, tuna, salmon, sea bass), 3–4 eggs, cottage cheese, kefir</td></tr>
-        <tr><td>Vegetables</td><td><b>2 fists</b></td><td>Salads, peppers, broccoli, courgette, cabbage, mushrooms, tomatoes, green beans</td></tr>
-        <tr><td>Carbs</td><td><b>0–1 cupped hand</b></td><td>Rice, potatoes, bulgur, wholemeal tortilla, pitta, rice cakes, fruit</td></tr>
-        <tr><td>Fats</td><td><b>1 thumb</b></td><td>Olive oil, avocado, parmesan, mature cheddar, unsalted pistachios</td></tr>
-      </table></div>
-      <p class="small"><b>Carb rule:</b> 1 cupped hand at meals before/after training. Rest days: carbs at lunch only – dinner = protein + veg.</p>
-    </div>
-    <div class="card">
-      <h2>Weekly menu – Monday to Friday</h2>
-      <p class="small muted">Meat/fish raw weight; rice, bulgur, potatoes cooked weight. P/C/F in grams, ±10–15% by brand.</p>
-      <div class="tablewrap"><table>
-        <tr><th>Time</th><th>Meal</th><th class="num">kcal</th><th class="num">P</th><th class="num">C</th><th class="num">F</th></tr>
-        ${rows}
-      </table></div>
-    </div>
-    <div class="card">
-      <h2>Rules that make it work</h2>
-      <ul>
-        <li>🍨 <b>Ice cream:</b> 2× per week, ~100 g, in a bowl or single cup – never from the tub, not late at night.</li>
-        <li>🥜 <b>Pistachios:</b> 15 g unsalted (~25 nuts) per day, before the evening.</li>
-        <li>🍽️ <b>Eating out:</b> protein + veg first, then ONE extra – dessert OR alcohol OR bread/fries.</li>
-        <li>🥋 <b>Post-training hunger:</b> 17:00 snack + a pre-plated dinner waiting = no kitchen raids.</li>
-        <li>🥛 <b>Lactose-friendly:</b> cottage cheese, kefir, aged hard cheese. No processed meats.</li>
-        <li>🎄 <b>Christmas:</b> planned 2-week maintenance break – maintenance, not "anything goes".</li>
-      </ul>
-    </div>
-    <div class="card">
-      <h2>Phases & keeping it off</h2>
-      <div class="tablewrap"><table>
-        <tr><th>Phase</th><th>When</th><th>Focus</th></tr>
-        <tr><td>1. Competition prep</td><td>Now → 1 Nov</td><td>~0.5 kg/week, carbs around training, no crash dieting</td></tr>
-        <tr><td>2. Main fat loss</td><td>Nov → ~Apr 2027</td><td>~0.5–0.75 kg/week, protein + veg + low carb</td></tr>
-        <tr><td>3. Keep it off</td><td>From 90 kg</td><td>Add carbs back over 2–4 weeks. <b>Ceiling rule:</b> weekly average &gt; 93 kg → 3 weeks of phase 2 rules</td></tr>
-      </table></div>
-    </div>`;
+  const menu = `<div class="card"><h2>Weekly menu – Monday to Friday</h2>
+    <p class="small muted">Meat/fish raw weight; rice, bulgur, potatoes cooked weight. P/C/F in grams, ±10–15% by brand.</p>
+    <div class="tablewrap"><table><tr><th>Time</th><th>Meal</th><th class="num">kcal</th><th class="num">P</th><th class="num">C</th><th class="num">F</th></tr>${rows}</table></div></div>`;
+  $("#tab-meals").innerHTML = prof.mealPlanHtml.replace("%MENU%", menu);
 }
 
 /* ===================== TRAINING ===================== */
 function renderTraining() {
-  const week = DAYS.map(d => `<div><b>${DAY_NAMES[d].slice(0,3)}</b>${esc(TRAINING_BY_DAY[d].title)}</div>`).join("");
-  const sess = k => `<div class="tablewrap"><table><tr><th>Exercise</th><th>Sets × reps</th><th>Progression</th></tr>${STRENGTH[k].ex.map(e => `<tr><td>${esc(e[0])}</td><td>${esc(e[1])}</td><td>${esc(e[2])}</td></tr>`).join("")}</table></div>`;
-  $("#tab-training").innerHTML = `
-    <div class="card">
-      <h2>Weekly schedule</h2>
-      <div class="week">${week}</div>
-      <p class="small muted">If you do noon BJJ on Mon/Fri, move that strength session to the next free day. Avoid hard leg work the day before Tue/Thu BJJ.</p>
-    </div>
-    <div class="card">
-      <h2>How to train</h2>
-      <ul>
-        <li>Stop each set ~2 reps before failure, rest 60–90 s.</li>
-        <li><b>Weeks 1–2:</b> 2 sets per exercise, then 3 sets.</li>
-        <li>Goal: keep (or build) muscle while losing fat, and perform well in BJJ.</li>
-      </ul>
-    </div>
-    <div class="card"><h2>${esc(STRENGTH.A.name)}</h2>${sess("A")}</div>
-    <div class="card"><h2>${esc(STRENGTH.B.name)}</h2>${sess("B")}</div>
-    <div class="card">
-      <h2>Conditioning & steps</h2>
-      <ul>
-        <li><b>Stairs (Wed or weekend):</b> 8–10 rounds – climb briskly, walk down (~10–12 min).</li>
-        <li><b>Steps:</b> 6,000 → <b>8,000</b> in October → <b>10,000</b> from November. 15-min walk after lunch on WFH days; biking to school counts.</li>
-        <li><b>Optional:</b> doorway pull-up bar – best bodyweight pulling and grip work for BJJ.</li>
-      </ul>
-    </div>
-    <div class="card">
-      <h2>🥋 Competition – GB Compnet, 1 November</h2>
-      <ul>
-        <li><b>Last strength session: Mon 26 Oct</b>, light (2 sets). Nothing heavy after that.</li>
-        <li>Competition week: lower BJJ intensity, sleep 7.5–8 h, eat normally with carbs. Confirm the division weight limit.</li>
-      </ul>
-    </div>
-    <div class="card">
-      <h2>Tracking</h2>
-      <div class="tablewrap"><table>
-        <tr><th>What</th><th>How often</th><th>Note</th></tr>
-        <tr><td>Weight</td><td>3–7× / week, morning</td><td>Only the weekly average matters</td></tr>
-        <tr><td>Waist (at navel)</td><td>Every Sunday</td><td>Best fat-loss signal</td></tr>
-        <tr><td>Body-composition scale + photos</td><td>Monthly</td><td>Same conditions each time</td></tr>
-        <tr><td>Blood tests</td><td>Now + after 3–6 months</td><td>Glucose/HbA1c, lipids + ApoB/Lp(a), liver, kidney, TSH, vit D, B12, ferritin, hs-CRP</td></tr>
-      </table></div>
-    </div>`;
+  const prof = P();
+  const week = DAYS.map(d => `<div><b>${DAY_NAMES[d].slice(0,3)}</b>${esc(prof.trainingByDay[d].title)}</div>`).join("");
+  const sessions = Object.values(prof.sessions).map(s => `<div class="card"><h2>${esc(s.name)}</h2><div class="tablewrap"><table>
+      <tr><th>What</th><th>How much</th><th>Progression / note</th></tr>
+      ${s.ex.map(e => `<tr><td>${esc(e[0])}</td><td>${esc(e[1])}</td><td>${esc(e[2])}</td></tr>`).join("")}</table></div></div>`).join("");
+  $("#tab-training").innerHTML = `<div class="card"><h2>Weekly schedule</h2><div class="week">${week}</div></div>` +
+    prof.trainingHtml.replace("%SESSIONS%", sessions);
 }
 
-/* ===================== SHOPPING ===================== */
-const SHOP_KEY = "wl-shopping-v1";
+/* ===================== SHOPPING (shared) ===================== */
+const SHOP_KEY = "wl-shopping-family-v1";
 const defaultShop = () => DEFAULT_SHOPPING.map((r, i) => ({ id: "d" + i, cat: r[0], name: r[1], qty: r[2], note: r[3], checked: false }));
 let shop = load(SHOP_KEY, null) || defaultShop();
 let hideChecked = load("wl-hide-checked", false);
@@ -550,8 +679,8 @@ function renderShopping() {
 
   $("#tab-shopping").innerHTML = `
     <div class="card">
-      <h2>🛒 Weekly shopping list <span class="tag">${left} left</span></h2>
-      <p class="small muted">Your portions, Monday–Friday. Scale up family dinners and add weekend meals. Changes are saved on this device.</p>
+      <h2>🛒 Family shopping list <span class="tag">${left} left</span></h2>
+      <p class="small muted">Shared list for Razvan (R) + Paula (P), Monday–Friday portions. Add your child's food and weekend meals. Changes are saved on this device.</p>
       <div class="shop-toolbar">
         <button class="btn primary" data-act="newweek">New week (untick all)</button>
         <button class="btn" data-act="hide">${hideChecked ? "Show" : "Hide"} ticked</button>
@@ -597,7 +726,8 @@ $("#tab-shopping").addEventListener("keydown", e => {
 });
 
 /* ===================== INIT ===================== */
-renderToday(); renderMeals(); renderTraining(); renderShopping();
+renderShopping();
+setWho(PROFILES[who] ? who : "razvan");
 showTab(localStorage.getItem("wl-tab") || "today");
 </script>
 </body>
